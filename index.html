@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>보건간호과 2인1조 임상 응급 방탈출</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons CDN -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- 구글 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Pretendard:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'sans-serif'],
+            jua: ['Jua', 'sans-serif'],
+            mono: ['"Share Tech Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #0b1120;
+      color: #e2e8f0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="w-full bg-slate-900/90 border-b border-slate-800 backdrop-blur px-4 py-3 sticky top-0 z-40 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+        <i class="ph-bold ph-first-aid text-xl"></i>
+      </div>
+      <div>
+        <h1 class="font-jua text-base md:text-lg text-white leading-tight flex items-center gap-1.5">
+          <span>임상 응급 방탈출</span>
+          <span class="text-xs font-sans font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-700/50">2인 1조</span>
+        </h1>
+        <p class="text-[11px] text-slate-400 font-medium">보건간호과 3학년 임상역량 & 상식 마스터</p>
+      </div>
+    </div>
+
+    <!-- 타이머, 음소거, 교사 관제탑 전환 버튼 -->
+    <div class="flex items-center gap-2.5">
+      <div id="header-timer-wrap" class="hidden items-center gap-1.5 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-700 text-rose-400 font-mono text-sm md:text-base font-bold">
+        <i class="ph-bold ph-timer text-lg animate-pulse"></i>
+        <span id="timer-display">40:00</span>
+      </div>
+
+      <button id="btn-sound-toggle" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="효과음 토글">
+        <i id="sound-icon" class="ph-bold ph-speaker-slash text-base text-amber-400"></i>
+      </button>
+
+      <button id="btn-toggle-teacher-mode" class="px-3 py-1.5 rounded-xl bg-indigo-950 hover:bg-indigo-900 text-indigo-300 border border-indigo-700/70 text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-indigo-950/50">
+        <i class="ph-bold ph-chalkboard-teacher text-base"></i>
+        <span id="teacher-mode-btn-text">교사 관제탑</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 뷰 1: 학생 대기실                                          -->
+  <!-- ======================================================== -->
+  <main id="view-student-lobby" class="w-full max-w-lg mx-auto p-4 md:p-6 flex-1 flex flex-col justify-center">
+    <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl relative">
+      
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-emerald-400 text-xs font-bold mb-3">
+          <i class="ph-bold ph-sparkle"></i> 50분 완성 20단계 릴레이 방탈출
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-white font-jua">
+          긴급 호출! 코드 블루를 해제하라
+        </h2>
+        <p class="text-slate-400 text-xs md:text-sm mt-1">
+          보건간호과 3학년 2인 1조 협동 임상 실무(12) & 상식(8) 20관문 챌린지
+        </p>
+        <div id="lobby-round-badge" class="hidden inline-block mt-2.5 px-3.5 py-1 rounded-full bg-amber-950/60 border border-amber-600/60 text-amber-300 text-xs font-black"></div>
+      </div>
+
+      <div class="space-y-4">
+        <!-- 조 선택 (1조~6조) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
+            <i class="ph-bold ph-users text-emerald-400"></i> 조 번호 선택
+          </label>
+          <select id="lobby-team-name" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-emerald-500">
+            <option value="1조">1조 (간호 1팀)</option>
+            <option value="2조">2조 (간호 2팀)</option>
+            <option value="3조">3조 (간호 3팀)</option>
+            <option value="4조">4조 (간호 4팀)</option>
+            <option value="5조">5조 (간호 5팀)</option>
+            <option value="6조">6조 (간호 6팀)</option>
+          </select>
+        </div>
+
+        <!-- 2인 이름 입력 -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-950/70 p-3 rounded-2xl border border-slate-800">
+            <span class="text-[11px] font-bold text-emerald-400 block mb-1">
+              <i class="ph-bold ph-clipboard-text"></i> 학생 A (차트·임상 분석)
+            </span>
+            <input id="lobby-student-a" type="text" placeholder="이름 입력" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <div class="bg-slate-950/70 p-3 rounded-2xl border border-slate-800">
+            <span class="text-[11px] font-bold text-teal-400 block mb-1">
+              <i class="ph-bold ph-key"></i> 학생 B (처방·암호 해독)
+            </span>
+            <input id="lobby-student-b" type="text" placeholder="이름 입력" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-teal-500">
+          </div>
+        </div>
+
+        <!-- 협동 규칙 안내 -->
+        <div class="bg-emerald-950/30 border border-emerald-800/40 rounded-2xl p-3 text-[11px] text-emerald-200 leading-relaxed flex items-start gap-2">
+          <i class="ph-bold ph-info text-base text-emerald-400 shrink-0 mt-0.5"></i>
+          <div>
+            <strong>2인 1조 협동 규칙:</strong> 태블릿은 둘 사이에 두고, 한 명은 문제 화면을 크게 읽고 다른 한 명은 단서를 조합해 암호를 입력하세요.
+          </div>
+        </div>
+
+        <!-- 선생님의 [시작 암호 4자리] 입력 박스 -->
+        <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-amber-500/50">
+          <label class="block text-xs font-bold text-amber-300 mb-1 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i class="ph-bold ph-lock-key text-amber-400"></i> 선생님의 [시작 비밀번호 4자리]
+            </span>
+            <span class="text-[10px] text-slate-400">선생님이 불러주면 입력</span>
+          </label>
+          <input id="lobby-start-passcode" type="text" maxlength="4" placeholder="비밀번호 4자리" class="w-full bg-slate-900 border-2 border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-center text-lg tracking-widest font-mono font-bold text-amber-300 focus:outline-none transition">
+          <p id="lobby-code-error" class="text-[11px] text-rose-400 font-bold mt-1.5 hidden text-center">
+            <i class="ph-bold ph-warning"></i> 비밀번호가 일치하지 않습니다! 선생님 말씀을 확인하세요.
+          </p>
+        </div>
+
+        <div id="p2p-sync-status" class="text-[10px] text-slate-500 text-center font-mono">
+          <i class="ph-bold ph-wifi-high text-emerald-500"></i> 교사 관제탑 실시간 채널 연결 대기 중...
+        </div>
+
+        <!-- 입장 버튼 -->
+        <button id="btn-start-game" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm md:text-base shadow-lg shadow-emerald-500/25 transition active:scale-[0.99] flex items-center justify-center gap-2">
+          <i class="ph-bold ph-door-open text-lg"></i>
+          <span>병실 입장하기!</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- 뷰 2: 20단계 방탈출 플레이 화면                            -->
+  <!-- ======================================================== -->
+  <main id="view-gameplay" class="hidden w-full max-w-2xl mx-auto p-3 md:p-5 flex-1 flex flex-col">
+    
+    <!-- 상단: 스테이지 정보 및 획득 글자 -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 mb-3 shadow-lg flex flex-col gap-2">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span id="stage-badge" class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase font-mono tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-700/60">
+            STAGE 01 / 20
+          </span>
+          <span id="stage-category-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-teal-300 border border-slate-700">
+            보건 임상
+          </span>
+        </div>
+        <div class="text-xs font-bold text-slate-400 flex items-center gap-1">
+          <span id="sync-dot" class="w-2 h-2 rounded-full inline-block bg-slate-600" title="관제탑 전송 상태"></span>
+          <span id="player-team-label" class="text-white font-black">1조</span>
+          <span class="text-slate-600">|</span>
+          <span id="role-pair-label" class="text-emerald-400">학생A / 학생B</span>
+        </div>
+      </div>
+
+      <!-- 20글자 마스터 조각 보관함 -->
+      <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+            <i class="ph-bold ph-puzzle-piece text-amber-400"></i> 수집된 마스터 키 조각 (20글자 완성):
+          </span>
+          <span id="key-progress-counter" class="text-[10px] font-mono text-amber-400 font-bold">0 / 20 글자</span>
+        </div>
+        <div id="key-slots-container" class="grid grid-cols-10 gap-1 text-center"></div>
+      </div>
+    </div>
+
+    <!-- 메인 문제 카드 -->
+    <div class="flex-1 bg-slate-900 border border-slate-800 rounded-3xl p-4 md:p-6 shadow-2xl flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h2 id="room-name" class="text-base md:text-lg font-black text-white font-jua flex items-center gap-1.5">
+            <i class="ph-bold ph-door-open text-emerald-400"></i>
+            <span>1관: 활력징후실 - 고열 환자 체온계 판독</span>
+          </h2>
+          <span id="stage-diff" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+            기초 활력징후 판독
+          </span>
+        </div>
+
+        <div class="bg-slate-950/60 border-l-4 border-emerald-500 rounded-r-xl p-2.5 text-xs text-slate-300 mb-3 leading-relaxed flex items-start gap-1.5" id="mission-instruction-box">
+          <i class="ph-bold ph-stethoscope text-emerald-400 text-sm shrink-0 mt-0.5"></i>
+          <span id="mission-instruction-text">미션 안내문</span>
+        </div>
+
+        <!-- 문제 내용 영역 (동적 렌더링) -->
+        <div id="stage-interactive-area" class="w-full bg-slate-950 rounded-2xl p-4 border border-slate-800 text-center min-h-[160px] flex flex-col items-center justify-center"></div>
+      </div>
+
+      <!-- 하단 정답 암호 입력부 (힌트 버튼 완전 제거) -->
+      <div class="mt-4 pt-3 border-t border-slate-800">
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <i class="ph-bold ph-lock-key absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+            <input id="passcode-input" type="text" autocomplete="off" placeholder="정답 암호 입력" class="w-full bg-slate-950 border-2 border-slate-700 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2.5 text-center font-mono font-bold text-base md:text-lg text-emerald-300 tracking-widest uppercase focus:outline-none transition">
+          </div>
+          <button id="btn-submit-code" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-black text-sm md:text-base transition flex items-center gap-1 shadow-lg shadow-emerald-500/20">
+            <span>해제</span>
+            <i class="ph-bold ph-key text-base"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between mt-2 px-1">
+          <p id="code-feedback-msg" class="text-xs font-bold text-rose-400 hidden">
+            <i class="ph-bold ph-warning"></i> 잘못된 암호입니다! 문제를 다시 확인하세요.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- 뷰 3: 교사용 중앙 관제탑 화면 (GitHub Pages 실시간 연동)     -->
+  <!-- ======================================================== -->
+  <main id="view-teacher-dashboard" class="hidden w-full max-w-4xl mx-auto p-4 md:p-6 flex-1 flex flex-col gap-4">
+    
+    <!-- 관제탑 헤더 및 비밀번호 제어 카드 -->
+    <div class="bg-slate-900 border border-indigo-800/80 rounded-3xl p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-500 text-indigo-400 flex items-center justify-center text-2xl">
+          <i class="ph-bold ph-monitor"></i>
+        </div>
+        <div>
+          <h2 class="text-lg md:text-xl font-jua text-white flex items-center gap-2">
+            <span>선생님 전용 교사 관제탑</span>
+            <span class="text-xs font-sans px-2.5 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-700">실시간 레이스 모니터링</span>
+          </h2>
+          <p class="text-xs text-slate-400">학생들이 태블릿에서 시작 비밀번호를 치고 입장하면 실시간으로 나타납니다.</p>
+        </div>
+      </div>
+
+      <!-- 관제탑 비밀번호 설정 & 초기화 박스 -->
+      <div class="flex items-center gap-2">
+        <div class="bg-slate-950 p-2.5 rounded-2xl border border-amber-500/60 flex items-center gap-2">
+          <div class="text-left">
+            <span class="block text-[10px] font-bold text-amber-400 uppercase tracking-wider">오늘의 시작 암호</span>
+          </div>
+          <input id="teacher-custom-passcode" type="text" maxlength="4" value="1004" class="w-20 bg-slate-900 border-2 border-amber-400 rounded-xl px-2 py-1 text-center font-mono font-black text-lg text-amber-300 tracking-widest focus:outline-none">
+          <button id="btn-save-teacher-passcode" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition">
+            적용
+          </button>
+        </div>
+
+        <button id="btn-reset-session" class="p-2.5 rounded-2xl bg-rose-950 hover:bg-rose-900 border border-rose-700 text-rose-300 text-xs font-bold transition flex items-center gap-1" title="다음 수업을 위해 전체 조 진행도 리셋">
+          <i class="ph-bold ph-arrow-counter-clockwise text-base"></i>
+          <span>초기화</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 라운드 선택 바 -->
+    <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2 flex-wrap">
+        <i class="ph-bold ph-stack text-amber-400 text-xl"></i>
+        <span class="text-sm font-bold text-white">진행 라운드 선택</span>
+        <span id="teacher-round-now" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700/60">현재 진행: ROUND 1</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="teacher-round-select" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-white focus:outline-none focus:border-amber-400"></select>
+        <button id="btn-apply-round" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition">라운드 적용</button>
+      </div>
+    </div>
+
+    <!-- 6개 조 실시간 레이스 현황 보드 -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <span class="text-sm font-bold text-white flex items-center gap-1.5">
+          <i class="ph-bold ph-ranking text-emerald-400"></i> 조별 실시간 탈출 현황판 (1조 ~ 6조)
+        </span>
+        <span id="active-teams-count-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-emerald-400 border border-slate-700">
+          접속 완료: 0조
+        </span>
+      </div>
+
+      <div id="teacher-host-status" class="text-[11px] font-mono text-slate-400 mb-3"></div>
+
+      <!-- 동적으로 나타나는 조 카드 영역 (입장한 조만 표시) -->
+      <div id="teacher-team-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- 뷰 4: 최종 탈출 성공 화면                                  -->
+  <!-- ======================================================== -->
+  <main id="view-game-clear" class="hidden w-full max-w-xl mx-auto p-4 md:p-6 flex-1 flex flex-col justify-center text-center">
+    <div class="bg-slate-900 border-2 border-emerald-500/80 rounded-3xl p-6 md:p-8 shadow-2xl">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 text-3xl mx-auto flex items-center justify-center mb-3 shadow-lg shadow-emerald-500/30">
+        <i class="ph-bold ph-trophy"></i>
+      </div>
+      
+      <div class="inline-block px-3 py-1 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-400 text-xs font-bold mb-2">
+        <span id="clear-round-label">🎉 20개 구역 올클리어 탈출 성공! 🎉</span>
+      </div>
+      <h2 class="text-2xl font-black text-white font-jua mb-1">
+        축하합니다! 임상 & 멘탈 웰니스 마스터!
+      </h2>
+      <p class="text-slate-400 text-xs md:text-sm mb-4">
+        우리 <span id="clear-team-name" class="text-emerald-400 font-bold">1조</span> 학생들, 끝까지 협동하여 20관문을 완파했습니다!
+      </p>
+
+      <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800 text-left mb-5 space-y-2.5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-2 gap-1">
+          <span class="text-xs font-bold text-slate-400">완성된 마스터 키 (20글자):</span>
+          <span id="clear-key-text" class="text-sm md:text-base font-jua font-black text-amber-400 tracking-wider"></span>
+        </div>
+        
+        <div class="bg-indigo-950/40 p-3 rounded-xl border border-indigo-800/40 text-xs leading-relaxed text-indigo-200">
+          <strong id="clear-info-title" class="text-indigo-300 font-bold block mb-1"></strong>
+          <span id="clear-info-body"></span>
+        </div>
+      </div>
+
+      <button id="btn-restart-game" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition">
+        처음으로 돌아가기
+      </button>
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- 게임 스크립트 & 클라우드 실시간 동기화                      -->
+  <!-- ======================================================== -->
+  <script>
+    // ★ 구글 앱스스크립트(GAS) 웹 앱 URL을 여기에 붙여넣으세요 (…/exec 로 끝나는 주소)
+    var API_URL = "https://script.google.com/macros/s/AKfycbxy1sz3pznYX7PRybyxWpmes--mc4l5cBX85HWyPtbTcw1MhGrGQffvSJVWM6bTdJCeyA/exec";
+
+    var currentMasterStartCode = "";
+    var teacherPin = "";
+    var myEpoch = null;
+    var myProgress = null;
+    var serverNowMs = Date.now();
+    var teacherPollTimer = null;
+    var teamsProgress = {};
+
+
+    // 20개 스테이지 데이터 (정답 스포일러 100% 제거 추리형)
+    var STAGES_R1 = {
+      1: {
+        category: "보건 임상 (1/12)",
+        diff: "기초 활력징후 판독",
+        roomName: "1관: 활력징후실 - 고열 환자 체온계 판독",
+        instruction: "학생 A는 차트에서 비정상 고열 상태를 확인하고, 학생 B는 침상의 전자체온계에 표시된 수치를 소수점 없이 숫자 3자리로 입력하세요.",
+        correctCodes: ["388"],
+        render: function() {
+          return '<div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">' +
+            '<div class="bg-slate-900 p-3 rounded-2xl border border-slate-800 text-left w-full sm:w-1/2">' +
+              '<span class="text-[11px] font-bold text-slate-400 block mb-1">📋 학생 A: EMR 차트</span>' +
+              '<div class="text-xs text-slate-300 space-y-1">' +
+                '<div>• 환자: 김○○ (24세 / 남)</div>' +
+                '<div>• 성인 기준 정상 체온 범위 숙지 필수</div>' +
+                '<div class="text-rose-400 font-bold">• 주호소: "온몸이 떨리고 열이 펄펄 끓어요"</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="bg-slate-900 p-3 rounded-2xl border-2 border-rose-500/60 text-center w-full sm:w-1/2">' +
+              '<span class="text-[11px] font-bold text-slate-400 block mb-1">🌡️ 학생 B: 침상 체온계 판독</span>' +
+              '<div class="text-3xl font-mono font-black text-rose-500 my-2">38.8 ℃</div>' +
+              '<span class="text-[10px] text-slate-400">숫자 3자리 입력</span>' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      2: {
+        category: "K-POP 넌센스 (1/8)",
+        diff: "아이돌 인원수 시각 연산",
+        roomName: "2관: 간호사실 로비 - 아이돌 멤버 수 연산 퍼즐",
+        instruction: "사물함에 적힌 세 걸그룹의 실제 공식 멤버 수를 떠올려 사칙연산 공식을 계산한 후 2자리 숫자를 입력하세요.",
+        correctCodes: ["26"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border border-purple-800/60 w-full max-w-md text-center">' +
+            '<span class="text-xs font-bold text-purple-400 block mb-2">🎵 간호사실 사물함 잠금 공식</span>' +
+            '<div class="bg-slate-950 p-3 rounded-xl font-jua text-base text-white border border-slate-800">' +
+              '( 에스파 멤버 수  ×  뉴진스 멤버 수 ) + 아이브 멤버 수 = [ ? ]' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      3: {
+        category: "보건 임상 (2/12)",
+        diff: "혈압 커프 기준 & 수축기압",
+        roomName: "3관: 진찰실 - 혈압 커프 위치와 수축기압",
+        instruction: "학생 A는 혈압 측정 시 상완동맥으로부터 커프를 몇 cm 위에 감아야 하는지 기억해내고, 학생 B는 혈압계의 수축기압 앞자리 2개를 합쳐 총 3자리 숫자를 완성하세요.",
+        correctCodes: ["212"],
+        render: function() {
+          return '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">' +
+            '<div class="bg-slate-900 p-3 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-teal-400 block mb-1">📖 기본간호 실무 매뉴얼</span>' +
+              '<p class="text-xs text-slate-300 leading-relaxed">' +
+                '"혈압 커프 하단은 팔꿈치 접히는 선(상완동맥)으로부터 손가락 1~2마디 정도인 <strong class=\"text-teal-300 font-bold\">[ ? ] cm</strong> 위에 감아야 합니다."' +
+              '</p>' +
+            '</div>' +
+            '<div class="bg-slate-900 p-3 rounded-2xl border border-slate-800 text-center">' +
+              '<span class="text-xs font-bold text-slate-400 block mb-1">📟 전자 혈압계 측정치</span>' +
+              '<div class="text-xl font-mono font-bold text-emerald-400">120 / 80 mmHg</div>' +
+              '<p class="text-[10px] text-slate-400 mt-1">[커프 위치 cm: 1자리] + [수축기압 앞 2자리]</p>' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      4: {
+        category: "글로벌 K-POP (2/8)",
+        diff: "글로벌 음원 초성 퀴즈",
+        roomName: "4관: 직원 휴게실 - 초성 노래 제목 퀴즈",
+        instruction: "전 세계를 강타한 K-술게임 모티브 빌보드 히트곡! 벽에 적힌 초성을 보고 한국어 곡명 3글자를 입력하세요.",
+        correctCodes: ["아파트", "APT"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border border-rose-800/60 w-full max-w-md text-center">' +
+            '<span class="text-xs font-bold text-rose-400 block mb-1">🎤 글로벌 차트 1위 술게임송</span>' +
+            '<div class="text-3xl font-jua text-amber-300 tracking-widest my-3 bg-slate-950 p-2.5 rounded-xl border border-slate-800">' +
+              'ㅇ ㅍ ㅌ !  ㅇ ㅍ ㅌ !' +
+            '</div>' +
+            '<p class="text-xs text-slate-400">한국어 제목 3글자를 입력하세요.</p>' +
+          '</div>';
+        }
+      },
+      5: {
+        category: "보건 임상 (3/12)",
+        diff: "응급 3대 체위 조합",
+        roomName: "5관: 처치실 - 응급 환자 체위 3자리 락",
+        instruction: "보기의 4가지 체위 번호 중 [호흡곤란 완화], [요추천자 검사], [저혈압 쇼크 대처]에 필요한 올바른 체위 번호를 순서대로 3자리 숫자로 나열하세요.",
+        correctCodes: ["132"],
+        render: function() {
+          return '<div class="w-full text-left bg-slate-900 p-3 rounded-2xl border border-slate-800 space-y-2">' +
+            '<div class="text-xs font-bold text-emerald-400 mb-1">📋 체위 보기 목록</div>' +
+            '<div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">' +
+              '<div>① 반좌위 (Fowler\'s)</div>' +
+              '<div>② 변형 트렌델렌버그</div>' +
+              '<div>③ 새우등 측위</div>' +
+              '<div>④ 복위 (Prone)</div>' +
+            '</div>' +
+            '<div class="text-xs text-slate-300 space-y-0.5 pt-1">' +
+              '<div>• [첫째 자리] 호흡곤란 환자의 횡격막을 하강시켜 호흡을 돕는 체위 번호</div>' +
+              '<div>• [둘째 자리] 요추천자 시 척추 극간을 최대한 넓히기 위한 체위 번호</div>' +
+              '<div>• [셋째 자리] 쇼크 시 뇌와 심장 혈류 공급을 위해 하체를 올리는 체위 번호</div>' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      6: {
+        category: "대중문화 밈 (3/8)",
+        diff: "화제의 서바이벌 명대사",
+        roomName: "6관: 의국 TV 세미나실 - 셰프의 유행어 암호",
+        instruction: "요리 서바이벌에서 안대를 쓰고 블라인드 심사를 보던 심사위원이 남긴 유명한 유행어 속 빈칸(전통 기름 이름) 3글자를 맞히세요.",
+        correctCodes: ["들기름"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border border-amber-800/60 w-full max-w-md text-center">' +
+            '<span class="text-xs font-bold text-amber-400 block mb-1">🕶️ 전 국민 유행어 밈</span>' +
+            '<div class="text-xl font-jua text-white bg-slate-950 p-3 rounded-xl border border-slate-800 my-2">' +
+              '"나야, [  ?  ?  ?  ]."' +
+            '</div>' +
+            '<p class="text-xs text-slate-400">빈칸 3글자를 입력하세요.</p>' +
+          '</div>';
+        }
+      },
+      7: {
+        category: "보건 임상 (4/12)",
+        diff: "더운물주머니 안전 기준치",
+        roomName: "7관: 온열치료실 - 더운물주머니(Hot bag) 안전 공식",
+        instruction: "화상 및 무게 압박을 방지하기 위한 물 주입 권장 비율(분모분자 기호 제외 숫자 2자리)과, 성인 피부 화상을 방지하기 위한 최고 한계 수온(℃) 2자리를 결합해 총 4자리 숫자를 입력하세요.",
+        correctCodes: ["1252"],
+        render: function() {
+          return '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">' +
+            '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-sky-400 block mb-1">💧 주입 용량 안전 기준</span>' +
+              '<p class="text-xs text-slate-300">물주머니의 무게감으로 인한 압박을 막기 위해 전체의 몇 분의 몇만 채워야 할까요? (예: 1/2 $\\rightarrow$ 12)</p>' +
+            '</div>' +
+            '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-rose-400 block mb-1">🔥 성인 안전 최고 수온</span>' +
+              '<p class="text-xs text-slate-300">성인 환자 적용 시 저온/고온 화상을 방지하기 위해 물 온도가 넘지 않아야 하는 최고 한계 온도는 몇 ℃일까요? (숫자 2자리)</p>' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      8: {
+        category: "트렌드 신조어 (4/8)",
+        diff: "SNS 라이프스타일 단어",
+        roomName: "8관: 보안실 - Z세대 라이프스타일 암호",
+        instruction: "자신이 지향하는 분위기나 외모, 라이프스타일을 뜻하는 신조어 [추구◯]의 마지막 글자 1개를 입력하세요.",
+        correctCodes: ["미", "추구미"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border border-indigo-800/60 w-full max-w-md text-center">' +
+            '<span class="text-xs font-bold text-indigo-400 block mb-1">📱 SNS 라이프스타일 키워드</span>' +
+            '<div class="text-xl font-jua text-indigo-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800 my-2">' +
+              '"오늘 내 [ 추 구 ? ] 는 완벽한 간호 전문가!"' +
+            '</div>' +
+            '<p class="text-xs text-slate-400">빈칸 1글자를 입력하세요.</p>' +
+          '</div>';
+        }
+      },
+      9: {
+        category: "보건 임상 (5/12)",
+        diff: "투약 원칙 개수 & 피하 각도",
+        roomName: "9관: 약제실 - 안전 투약 원칙 + SC 주사 각도",
+        instruction: "기본간호에서 강조하는 안전 투약 기본 원칙(Rights)의 총 개수(1자리)와, 인슐린 피하주사(SC) 시 바늘을 찌르는 권장 주사 각도(2자리)를 합쳐 3자리 숫자를 입력하세요.",
+        correctCodes: ["545"],
+        render: function() {
+          return '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">' +
+            '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-purple-400 block mb-1">💊 투약의 기본 Rights</span>' +
+              '<p class="text-xs text-slate-300">정확한 약, 환자, 용량, 시간, 경로... 투약 시 반드시 확인해야 하는 기본 원칙은 총 몇 개일까요?</p>' +
+            '</div>' +
+            '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-emerald-400 block mb-1">💉 인슐린 피하(SC) 주사 각도</span>' +
+              '<p class="text-xs text-slate-300">피하지방층에 안전하게 약물이 흡수되도록 피부에 찌르는 표준 권장 각도는 몇 도일까요?</p>' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      10: {
+        category: "식문화 넌센스 (5/8)",
+        diff: "다이어트 유행어 넌센스",
+        roomName: "10관: 영양실 - 마라탕 & 탕후루 넌센스",
+        instruction: "아무리 달고 기름진 간식이라도 '맛있게 먹으면 몇 칼로리'라고 부를까요? 숫자+단어(한글)로 입력하세요.",
+        correctCodes: ["0칼로리", "0kcal", "0"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border border-pink-800/60 w-full max-w-md text-center">' +
+            '<span class="text-xs font-bold text-pink-400 block mb-1">🍭 대국민 간식 다이어트 명언</span>' +
+            '<div class="text-xl font-jua text-pink-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800 my-2">' +
+              '"맛있게 먹으면 [  ?  ?  ?  ] !"' +
+            '</div>' +
+            '<p class="text-xs text-slate-400">정답을 입력하세요.</p>' +
+          '</div>';
+        }
+      },
+      11: {
+        category: "보건 임상 (6/12)",
+        diff: "영아 심첨맥박 위치 & 맥박수",
+        roomName: "11관: 소아병동 - 영아 심첨맥박 측정 위치와 정상 맥박",
+        instruction: "영아의 심첨맥박을 청진하는 좌측 갈비뼈 사이(늑간) 번호(1자리)와, 영아의 안정 시 분당 정상 맥박수 최솟값(3자리)을 나란히 이어 총 4자리 숫자를 입력하세요.",
+        correctCodes: ["4120"],
+        render: function() {
+          return '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">' +
+            '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-amber-400 block mb-1">👶 영아 심첨맥박 청진 위치</span>' +
+              '<p class="text-xs text-slate-300">쇄골중앙선과 만나는 좌측 제 몇 늑간에서 청진해야 할까요? (성인 5늑간보다 한 칸 위)</p>' +
+            '</div>' +
+            '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-teal-400 block mb-1">💓 영아 정상 심박동수</span>' +
+              '<p class="text-xs text-slate-300">영아의 안정 시 정상 맥박 범위는 분당 몇 회부터 160회까지일까요? (시작 최솟값 3자리)</p>' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      12: {
+        category: "안전 상식 (6/8)",
+        diff: "응급구조 직통 번호",
+        roomName: "12관: 방재센터 - 국민 응급 신고 번호",
+        instruction: "화재나 위급한 환자 발생 시 가장 먼저 눌러야 하는 대한민국 응급의료 및 구조 대표 전화번호 3자리를 입력하세요.",
+        correctCodes: ["119"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border border-rose-800/60 w-full max-w-md text-center">' +
+            '<span class="text-xs font-bold text-rose-400 block mb-1">🚒 응급의료 및 재난 신고</span>' +
+            '<div class="text-3xl font-mono font-black text-rose-400 bg-slate-950 p-2.5 rounded-xl border border-slate-800 my-2">' +
+              '[ ? ][ ? ][ ? ]' +
+            '</div>' +
+            '<p class="text-xs text-slate-400">대표 번호 3자리를 입력하세요.</p>' +
+          '</div>';
+        }
+      },
+      13: {
+        category: "보건 임상 (7/12)",
+        diff: "산소 캐뉴러 유량 & 안전 수칙",
+        roomName: "13관: 호흡기치료실 - 비강 캐뉴러 권장 유량과 화기 안전",
+        instruction: "비강 캐뉴러 사용 시 점막 건조를 방지하기 위한 최대 권장 산소 투여 유량(L/분: 1자리)과, 산소 요법 중인 병실에서 인화 물질이나 화기 사용의 허용 수치(1자리)를 결합한 2자리 숫자를 입력하세요.",
+        correctCodes: ["60"],
+        render: function() {
+          return '<div class="w-full text-left bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-2">' +
+            '<div class="text-xs text-slate-300 leading-relaxed">' +
+              '• [첫째 자리] 비강 캐뉴러는 코 점막의 손상을 막기 위해 분당 최고 몇 L 이하로 투여를 권장할까요?<br>' +
+              '• [둘째 자리] 산소는 강한 지연성 가스이므로, 병실 내 라이터나 전열기기 등 화기 사용은 몇 회 허용될까요?' +
+            '</div>' +
+            '<div class="text-center font-mono text-xs text-slate-400 pt-1">[권장 유량 1자리] + [화기 허용치 1자리] = 2자리</div>' +
+          '</div>';
+        }
+      },
+      14: {
+        category: "숏폼 트렌드 (7/8)",
+        diff: "댄스 챌린지 초성 퀴즈",
+        roomName: "14관: 체력단련실 - 댄스 챌린지 초성 암호",
+        instruction: "숏폼 댄스 챌린지를 강타했던 연기 춤의 곡명 초성을 보고 한국어 3글자로 입력하세요.",
+        correctCodes: ["스모크", "SMOKE"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border border-teal-800/60 w-full max-w-md text-center">' +
+            '<span class="text-xs font-bold text-teal-400 block mb-1">🔥 숏폼 댄스 챌린지 곡명</span>' +
+            '<div class="text-2xl font-jua text-teal-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800 my-2">' +
+              'ㅅ  ㅁ  ㅋ' +
+            '</div>' +
+            '<p class="text-xs text-slate-400">곡명 3글자를 입력하세요.</p>' +
+          '</div>';
+        }
+      },
+      15: {
+        category: "보건 임상 (8/12)",
+        diff: "멸균포 개봉 원칙 순서",
+        roomName: "15관: 중앙공급실 - 멸균포 여는 올바른 순서 번호",
+        instruction: "멸균 드레싱 세트를 개봉할 때 작업자의 신체로 인한 오염을 방지하기 위한 올바른 개봉 순서 번호를 차례대로 나열하여 3자리 숫자를 입력하세요.",
+        correctCodes: ["134"],
+        render: function() {
+          return '<div class="w-full text-left bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-2">' +
+            '<div class="text-xs font-bold text-emerald-400 mb-1">📦 멸균 세트 모서리 목록</div>' +
+            '<div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">' +
+              '<div>① 작업자 기준 가장 먼 쪽</div>' +
+              '<div>② 위쪽</div>' +
+              '<div>③ 멸균포의 양옆 쪽</div>' +
+              '<div>④ 작업자 몸 쪽(앞쪽)</div>' +
+            '</div>' +
+            '<p class="text-xs text-slate-300 pt-1">가장 먼저 열어야 하는 모서리부터 마지막에 열어야 하는 모서리 번호를 차례대로 3자리로 조합하세요.</p>' +
+          '</div>';
+        }
+      },
+      16: {
+        category: "대중문화 (8/8)",
+        diff: "인기 의학 드라마 약칭",
+        roomName: "16관: 옥상 정원 - 밴드 의사 드라마 약칭",
+        instruction: "대학 동기 5인방 의사들의 일상과 밴드 활동을 그려 큰 사랑을 받은 의학 드라마 <슬기로운 의사생활>의 팬들이 부르는 3글자 줄임말을 입력하세요.",
+        correctCodes: ["슬의생"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border border-purple-800/60 w-full max-w-md text-center">' +
+            '<span class="text-xs font-bold text-purple-400 block mb-1">🎸 율제병원 밴드 드라마</span>' +
+            '<div class="text-xl font-jua text-white bg-slate-950 p-3 rounded-xl border border-slate-800 my-2">' +
+              '"슬기로운 의사생활 = [ ? ? ? ]"' +
+            '</div>' +
+            '<p class="text-xs text-slate-400">3글자 약칭을 입력하세요.</p>' +
+          '</div>';
+        }
+      },
+      17: {
+        category: "보건 임상 (9/12)",
+        diff: "단순도뇨 규격 & 여성 삽입 길이",
+        roomName: "17관: 비뇨처치실 - 단순도뇨(Nelaton) 카테터와 삽입 길이",
+        instruction: "성인 단순도뇨에 가장 보편적으로 처방되는 카테터 굵기(Fr 단위 숫자: 2자리)와, 여성 요도에 소변이 흘러나올 때까지 삽입해야 하는 평균 깊이(cm: 1자리)를 결합한 3자리 숫자를 입력하세요.",
+        correctCodes: ["145"],
+        render: function() {
+          return '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">' +
+            '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-sky-400 block mb-1">🩺 성인 카테터 권장 규격</span>' +
+              '<p class="text-xs text-slate-300">성인 단순도뇨 시 가장 흔하게 사용하는 표준 규격은 몇 Fr일까요? (숫자 2자리)</p>' +
+            '</div>' +
+            '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+              '<span class="text-xs font-bold text-teal-400 block mb-1">📏 여성 요도 삽입 깊이</span>' +
+              '<p class="text-xs text-slate-300">여성 환자의 경우 소변이 흘러나올 때까지 부드럽게 삽입해야 하는 평균 길이는 약 몇 cm일까요?</p>' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      18: {
+        category: "보건 임상 (10/12)",
+        diff: "저혈당 처치 선택 & 경계치",
+        roomName: "18관: 내분비병동 - 식은땀 저혈당 응급 처치",
+        instruction: "의식이 남아있는 저혈당 환자에게 즉시 먹여야 할 올바른 간호 중재 번호(1자리)와, 임상에서 저혈당을 진단하는 혈당 경계치(mg/dL: 2자리)를 결합한 3자리 숫자를 입력하세요.",
+        correctCodes: ["270"],
+        render: function() {
+          return '<div class="w-full text-left bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-2">' +
+            '<div class="text-xs text-rose-400 font-bold">⚠️ 당뇨 환자가 식은땀과 어지럼증을 호소하고 있습니다.</div>' +
+            '<div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">' +
+              '<div>① 찬물 1컵</div>' +
+              '<div>② 오렌지 주스 반 컵</div>' +
+              '<div>③ 삶은 달걀 1개</div>' +
+              '<div>④ 버터 토스트 1조각</div>' +
+            '</div>' +
+            '<div class="text-xs text-slate-300">' +
+              '• [첫째 자리] 흡수가 빠른 단순당질 응급 식품 번호<br>' +
+              '• [둘째~셋째 자리] 환자의 혈당이 몇 mg/dL 이하일 때 저혈당으로 판단할까요?' +
+            '</div>' +
+          '</div>';
+        }
+      },
+      19: {
+        category: "보건 임상 (11/12)",
+        diff: "보호구(PPE) 탈의 순서",
+        roomName: "19관: 음압격리실 - PPE 보호구 탈의 시퀀스",
+        instruction: "오염된 격리실을 빠져나올 때 교차 감염을 방지하기 위한 표준 보호구 탈의 순서 번호를 1단계부터 4단계까지 차례대로 나열하여 4자리 숫자를 입력하세요.",
+        correctCodes: ["1423"],
+        render: function() {
+          return '<div class="w-full text-left bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-2">' +
+            '<div class="text-xs font-bold text-teal-400 mb-1">🛡️ 보호구 품목 목록</div>' +
+            '<div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">' +
+              '<div>① 일회용 장갑</div>' +
+              '<div>② 격리 가운</div>' +
+              '<div>③ 마스크 (격리실 밖에서 제거)</div>' +
+              '<div>④ 고글 / 페이스쉴드</div>' +
+            '</div>' +
+            '<p class="text-xs text-slate-300 pt-1">가장 오염도가 심한 부위부터 시작하여 올바른 탈의 순서 번호 4자리를 조합하세요.</p>' +
+          '</div>';
+        }
+      },
+      20: {
+        category: "보건 임상 (12/12 최종 탈출)",
+        diff: "성인 CPR 가이드라인",
+        roomName: "20관: 중환자실 1020호 - CPR 30:2 최종 비상 암호!",
+        instruction: "가슴압박과 인공호흡의 권장 비율(3자리) + 분당 최소 가슴압박 권장 속도(3자리) + 성인 압박 권장 깊이(cm 단위 숫자: 1자리)를 차례대로 이어 붙인 총 7자리 패스코드를 입력하고 탈출하세요!",
+        correctCodes: ["3021005"],
+        render: function() {
+          return '<div class="bg-slate-900 p-4 rounded-2xl border-2 border-rose-600/70 w-full text-center">' +
+            '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950 text-rose-400 border border-rose-800 text-xs font-bold mb-3 animate-pulse">' +
+              '<i class=\"ph-bold ph-warning\"></i> CODE BLUE 최종 해제 락' +
+            '</div>' +
+            '<div class="text-xs text-slate-300 space-y-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800 text-left">' +
+              '<div>• [첫 3자리] 성인 심폐소생술의 가슴압박 : 인공호흡 권장 비율 숫자</div>' +
+              '<div>• [중간 3자리] 성인 가슴압박 시 권장되는 분당 최소 횟수 (분당 ?회)</div>' +
+              '<div>• [마지막 1자리] 성인 가슴압박 시 권장되는 압박 깊이 (약 ?cm)</div>' +
+            '</div>' +
+          '</div>';
+        }
+      }
+    };
+
+    // ====================================================
+    // 라운드 확장 (ROUND 2 ~ 5): 같은 양식, 난이도 상승
+    // ====================================================
+    function hCardTwo(a, b) {
+      function one(x) {
+        return '<div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-left">' +
+          '<span class="text-xs font-bold ' + x[1] + ' block mb-1">' + x[0] + '</span>' +
+          '<p class="text-xs text-slate-300 leading-relaxed">' + x[2] + '</p></div>';
+      }
+      return '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">' + one(a) + one(b) + '</div>';
+    }
+
+    function hCardList(title, tc, opts, bullets) {
+      var h = '<div class="w-full text-left bg-slate-900 p-3 rounded-2xl border border-slate-800 space-y-2">' +
+        '<div class="text-xs font-bold ' + tc + ' mb-1">' + title + '</div>';
+      if (opts && opts.length) {
+        h += '<div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">' +
+          opts.map(function(o) { return '<div>' + o + '</div>'; }).join('') + '</div>';
+      }
+      h += '<div class="text-xs text-slate-300 space-y-1 pt-1">' +
+        bullets.map(function(b) { return '<div>• ' + b + '</div>'; }).join('') + '</div></div>';
+      return h;
+    }
+
+    function hCardOne(label, lc, border, big, bigCls, sub) {
+      return '<div class="bg-slate-900 p-4 rounded-2xl border ' + border + ' w-full max-w-md text-center">' +
+        '<span class="text-xs font-bold ' + lc + ' block mb-1">' + label + '</span>' +
+        '<div class="' + bigCls + ' bg-slate-950 p-2.5 rounded-xl border border-slate-800 my-2">' + big + '</div>' +
+        (sub ? '<p class="text-xs text-slate-400">' + sub + '</p>' : '') + '</div>';
+    }
+
+    var CLIN_SLOTS = [1, 3, 5, 7, 9, 11, 13, 15, 17, 18, 19, 20];
+
+    function mkStage(n, category, x, offset) {
+      // x: [diff, room, instruction, codes, html] (임상) / [topic, diff, room, instruction, codes, html] (상식)
+      var o = offset;
+      return {
+        category: category,
+        diff: x[o],
+        roomName: n + '관: ' + x[o + 1],
+        instruction: x[o + 2],
+        correctCodes: x[o + 3],
+        render: function() { return x[o + 4]; }
+      };
+    }
+
+    function buildRound(clin, triv) {
+      var out = {}, ci = 0, ti = 0;
+      for (var n = 1; n <= 20; n++) {
+        if (CLIN_SLOTS.indexOf(n) > -1) {
+          ci++;
+          out[n] = mkStage(n, '보건 임상 (' + ci + '/12' + (n === 20 ? ' 최종 탈출)' : ')'), clin[ci - 1], 0);
+        } else {
+          ti++;
+          var t = triv[ti - 1];
+          out[n] = mkStage(n, t[0] + ' (' + ti + '/8)', t, 1);
+        }
+      }
+      return out;
+    }
+
+    // 정답 암호 입력 안내 색상 단축
+    var TEAL = 'text-teal-400', SKY = 'text-sky-400', ROSE = 'text-rose-400', AMBER = 'text-amber-400',
+        PURPLE = 'text-purple-400', EMER = 'text-emerald-400', INDIGO = 'text-indigo-400', PINK = 'text-pink-400';
+
+    // ------------------------------ ROUND 2 ------------------------------
+    var R2_CLIN = [
+      ["정상 활력징후 하한", "활력징후실 - 정상 범위 암기 체크",
+       "학생 A는 [성인 맥박], 학생 B는 [성인 호흡]의 안정 시 정상 범위 중 '최솟값'을 각각 찾아 이어서 4자리 숫자로 입력하세요.",
+       ["6012"],
+       hCardTwo(["📋 학생 A: 정상 맥박수", TEAL, "성인 안정 시 정상 맥박은 분당 [ ? ] ~ 100회입니다. (최솟값 2자리)"],
+                ["🫁 학생 B: 정상 호흡수", SKY, "성인 안정 시 정상 호흡은 분당 [ ? ] ~ 20회입니다. (최솟값 2자리)"])],
+
+      ["고혈압 진단 기준", "진찰실 - 혈압 분류 기준",
+       "학생 A는 차트의 환자 혈압을 확인하고, 학생 B는 성인 고혈압 진단 기준(수축기 3자리 + 이완기 2자리)을 이어 5자리로 입력하세요.",
+       ["14090"],
+       hCardTwo(["📋 학생 A: EMR 차트", TEAL, "환자 박○○ (58세)<br>측정 혈압 <strong class='text-rose-400'>150 / 95 mmHg</strong><br>안정 후 두 번 측정 모두 동일"],
+                ["📖 학생 B: 진단 기준", SKY, "성인 고혈압 진단 기준:<br>수축기 [ ? ] mmHg 이상 <strong>또는</strong> 이완기 [ ? ] mmHg 이상"])],
+
+      ["주사 각도 조합", "주사실 - 근육주사 & 피하주사 각도",
+       "근육주사(IM)의 삽입 각도(2자리)와 피하주사(SC)의 일반적인 삽입 각도(2자리)를 차례대로 이어 4자리 숫자를 입력하세요.",
+       ["9045"],
+       hCardTwo(["💉 근육주사(IM) 각도", PURPLE, "근육 깊숙이 약물이 들어가도록 피부에 찌르는 표준 각도는 몇 도일까요? (2자리)"],
+                ["💉 피하주사(SC) 각도", EMER, "피하지방층에 약물을 주입할 때 일반적인 표준 각도는 몇 도일까요? (2자리)"])],
+
+      ["맥박·호흡 분당 환산", "관찰실 - 짧은 시간 측정값의 분당 환산",
+       "학생 A는 맥박, 학생 B는 호흡의 분당 수치를 계산해 [맥박 2자리 + 호흡 2자리] 4자리로 입력하세요.",
+       ["7218"],
+       hCardTwo(["⏱️ 학생 A: 맥박 측정", AMBER, "15초 동안 요골맥박 <strong>18회</strong> 측정<br>→ 분당 맥박수는? (2자리)"],
+                ["⏱️ 학생 B: 호흡 측정", TEAL, "30초 동안 호흡 <strong>9회</strong> 관찰<br>→ 분당 호흡수는? (2자리)"])],
+
+      ["체온 측정 부위 환산", "처치실 - 측정 부위별 체온 환산",
+       "학생 B의 기준으로 겨드랑이 체온을 구강 체온으로 환산한 값을 소수점 없이 3자리 숫자로 입력하세요. (예: 36.5℃ → 365)",
+       ["369"],
+       hCardTwo(["🌡️ 학생 A: 체온 측정 결과", ROSE, "겨드랑이(액와)에서 측정한 체온 <strong class='text-rose-400'>36.4 ℃</strong>"],
+                ["📖 학생 B: 부위별 차이", SKY, "구강 체온을 기준으로<br>직장 체온은 약 0.5℃ 높고,<br>겨드랑이 체온은 약 0.5℃ 낮습니다."])],
+
+      ["체위 조합", "처치실 - 상황별 체위 3자리 락",
+       "상황에 맞는 체위 번호를 [첫째·둘째·셋째] 순서대로 이어 3자리 숫자로 입력하세요.",
+       ["124"],
+       hCardList("📋 체위 보기 목록", EMER, ["① 쇄석위", "② 심즈위(Sims)", "③ 배횡와위", "④ 복위(Prone)"],
+         ["[첫째 자리] 분만 시 발걸이에 다리를 올려 고관절·무릎을 굽히는 체위",
+          "[둘째 자리] 관장 시 주로 취하는 좌측위 기반 체위",
+          "[셋째 자리] 등·엉치 부위 관찰이나 척추 수술 후 사용하는 엎드린 체위"])],
+
+      ["경구 투약 정수 계산", "약제실 - 처방 용량과 정제 수",
+       "[1회 투여 정수(1자리)]와 [하루 총 정수(1자리)]를 이어 2자리 숫자로 입력하세요.",
+       ["39"],
+       hCardTwo(["💊 학생 A: 처방", PURPLE, "약물 <strong>750 mg</strong> 경구 투여, <strong>1일 3회</strong>"],
+                ["💊 학생 B: 약품 규격", EMER, "1정 = <strong>250 mg</strong><br>① 1회 투여 정수 ② 1일 총 정수"])],
+
+      ["수액 시간당 주입량", "수액실 - 시간당 주입량 계산",
+       "시간당 주입량(mL/시간)을 3자리 숫자로 입력하세요.",
+       ["125"],
+       hCardTwo(["💧 학생 A: 처방", SKY, "5% 포도당 수액 <strong>1000 mL</strong>를 <strong>8시간</strong> 동안 일정한 속도로 주입"],
+                ["🧮 학생 B: 계산", TEAL, "시간당 주입량 = 총 수액량 ÷ 주입 시간<br>(mL/시간, 3자리)"])],
+
+      ["열량 계산", "영양실 - 식사 열량 계산",
+       "총 열량(kcal)을 3자리 숫자로 입력하세요.",
+       ["410"],
+       hCardTwo(["🍚 학생 A: 식사 영양소", AMBER, "탄수화물 <strong>60 g</strong><br>단백질 <strong>20 g</strong><br>지방 <strong>10 g</strong>"],
+                ["🧮 학생 B: 열량 기준", EMER, "탄수화물·단백질 1 g당 4 kcal<br>지방 1 g당 9 kcal"])],
+
+      ["화상 체표면적(9의 법칙)", "화상치료실 - 성인 9의 법칙",
+       "학생 A가 확인한 화상 부위의 체표면적(%) 합계를 학생 B의 기준표로 계산해 2자리 숫자로 입력하세요.",
+       ["36"],
+       hCardTwo(["🔥 학생 A: 화상 부위", ROSE, "성인 환자<br>머리·얼굴, 오른팔 전체, 몸통 앞면에 화상"],
+                ["📖 학생 B: 성인 9의 법칙", SKY, "머리·목 9% / 팔 한쪽 9%<br>몸통 앞 18% / 몸통 뒤 18%<br>다리 한쪽 18% / 회음부 1%"])],
+
+      ["표준주의 & 공기주의", "감염관리실 - 손위생 계기와 N95",
+       "[손위생 계기 수(1자리)]와 [호흡보호구 숫자(2자리)]를 이어 3자리 숫자로 입력하세요.",
+       ["595"],
+       hCardTwo(["🧼 학생 A: 표준주의", TEAL, "WHO가 제시한 손위생 '5계기'는 총 몇 가지일까요? (1자리)"],
+                ["😷 학생 B: 공기주의 격리", ROSE, "폐결핵 환자 병실 출입 시 착용하는 보건용 호흡보호구 N○○의 숫자 2자리"])],
+
+      ["심정지 대응 순서", "중환자실 2020호 - 성인 심정지 최종 비상 암호!",
+       "가장 먼저 해야 하는 단계부터 마지막 단계까지 번호를 순서대로 4자리로 조합해 탈출하세요!",
+       ["3421"],
+       hCardList("🚨 성인 심정지 대응 단계", ROSE, ["① 가슴압박 30회", "② 호흡 확인 (최대 10초)", "③ 반응 확인", "④ 119 신고 & AED 요청"],
+         ["올바른 시행 순서를 번호로 나열하세요."])]
+    ];
+
+    var R2_TRIV = [
+      ["K-POP 연산", "아이돌 멤버 수 연산", "간호사실 로비 - 아이돌 멤버 수 연산 퍼즐",
+       "세 그룹의 공식 멤버 수를 떠올려 계산한 2자리 숫자를 입력하세요.",
+       ["99"],
+       hCardOne("🎵 간호사실 사물함 잠금 공식", PURPLE, "border-purple-800/60",
+         "( BTS 멤버 수 + 블랙핑크 멤버 수 ) × 트와이스 멤버 수 = [ ? ]", "font-jua text-base text-white", "")],
+
+      ["글로벌 K-POP", "노래 제목 초성 퀴즈", "직원 휴게실 - 초성 노래 제목 퀴즈",
+       "초성을 보고 걸그룹 아이브의 대표곡 제목 5글자를 한국어로 입력하세요.",
+       ["러브다이브", "LOVEDIVE"],
+       hCardOne("🎤 글로벌 히트곡 초성", "text-rose-400", "border-rose-800/60",
+         "ㄹㅂ ㄷㅇㅂ", "text-3xl font-jua text-amber-300 tracking-widest", "한국어 제목 5글자를 입력하세요.")],
+
+      ["속담 퀴즈", "속담 빈칸 채우기", "의국 휴게실 - 속담 암호",
+       "속담의 빈칸에 들어갈 3글자를 입력하세요.",
+       ["외양간"],
+       hCardOne("🐄 속담 퀴즈", AMBER, "border-amber-800/60",
+         "소 잃고 [ ? ? ? ] 고친다", "text-xl font-jua text-white", "빈칸 3글자를 입력하세요.")],
+
+      ["대중문화 밈", "유행어 빈칸 채우기", "보안실 - 유행어 암호",
+       "전 국민이 따라 했던 유행어 '중꺾마'의 마지막 단어 2글자를 입력하세요.",
+       ["마음"],
+       hCardOne("🔥 유행어 퀴즈", INDIGO, "border-indigo-800/60",
+         "중요한 건 꺾이지 않는 [ ? ? ]", "text-xl font-jua text-indigo-300", "빈칸 2글자를 입력하세요.")],
+
+      ["넌센스", "넌센스 퀴즈", "영양실 - 넌센스 암호",
+       "정답 3글자를 입력하세요.",
+       ["후다닭"],
+       hCardOne("🐔 넌센스 퀴즈", PINK, "border-pink-800/60",
+         "세상에서 가장 빠른 닭은?", "text-xl font-jua text-pink-300", "정답 3글자를 입력하세요.")],
+
+      ["넌센스", "과일 넌센스 퀴즈", "휴게실 자판기 - 과자 넌센스",
+       "정답 4글자를 입력하세요.",
+       ["바나나킥"],
+       hCardOne("🍌 넌센스 퀴즈", AMBER, "border-amber-800/60",
+         "바나나가 웃으면?", "text-xl font-jua text-amber-300", "정답 4글자를 입력하세요.")],
+
+      ["의학 드라마", "인기 의학 드라마 주인공", "옥상 정원 - 돌담병원 의사 이름",
+       "돌담병원 외과 의사가 주인공인 드라마의 주인공 별명 3글자를 입력하세요.",
+       ["김사부"],
+       hCardOne("🏥 의학 드라마 퀴즈", TEAL, "border-teal-800/60",
+         "낭만닥터 [ ? ? ? ]", "text-xl font-jua text-white", "주인공 이름 3글자를 입력하세요.")],
+
+      ["인체 상식", "인체 상식 퀴즈", "해부학 실습실 - 인체 상식 암호",
+       "정답 2글자를 입력하세요.",
+       ["피부"],
+       hCardOne("🧬 인체 상식", SKY, "border-sky-800/60",
+         "우리 몸에서 가장 큰 장기는?", "text-xl font-jua text-sky-300", "정답 2글자를 입력하세요.")]
+    ];
+
+    // ------------------------------ ROUND 3 ------------------------------
+    var R3_CLIN = [
+      ["멸균 온도·압력", "중앙공급실 - 고압증기멸균 설정값",
+       "[멸균 온도(3자리)]와 [압력(2자리)]을 이어 5자리 숫자로 입력하세요.",
+       ["12115"],
+       hCardTwo(["♨️ 학생 A: 고압증기멸균기 온도", ROSE, "가장 표준적인 멸균 온도는 □□□ ℃ 입니다. (3자리)"],
+                ["⚙️ 학생 B: 압력 설정", SKY, "표준 설정 압력은 □□ 파운드(lb/in²) 입니다. (2자리)"])],
+
+      ["투약 약어 해독", "약제실 - 처방 약어 해독",
+       "[tid의 하루 투약 횟수(1자리)]와 [5일간 총 투약 횟수(2자리)]를 이어 3자리 숫자로 입력하세요.",
+       ["315"],
+       hCardTwo(["📋 학생 A: 처방전", PURPLE, "아목시실린 500 mg <strong>PO tid pc</strong> × <strong>5일</strong>"],
+                ["📖 학생 B: 처방 약어", SKY, "PO = 경구 / pc = 식후<br><strong>tid</strong> = 하루 □회 (1자리)<br>5일간 총 투약 횟수 (2자리)"])],
+
+      ["활력징후 이상 판정", "병동 관찰실 - 이상 항목 찾기",
+       "[정상 범위를 벗어난 항목 수(1자리)]와 [맥압(2자리)]을 이어 3자리 숫자로 입력하세요.",
+       ["440"],
+       hCardTwo(["📋 학생 A: 활력징후 차트", ROSE, "체온 38.2℃ / 맥박 112회 / 호흡 24회<br>혈압 100/60 mmHg / SpO₂ 91%"],
+                ["📖 학생 B: 성인 정상 범위", TEAL, "체온 36.5~37.5℃ / 맥박 60~100 / 호흡 12~20<br>수축기 90~139 &amp; 이완기 60~89 / SpO₂ 95% 이상<br>맥압 = 수축기 − 이완기"])],
+
+      ["의식수준 단계 순서", "신경외과 병동 - 의식수준 단계 배열",
+       "의식이 가장 명료한 상태부터 가장 낮은 상태까지 번호를 순서대로 나열해 4자리 숫자로 입력하세요.",
+       ["2413"],
+       hCardList("🧠 의식수준 단계 보기", SKY, ["① 혼미(Stupor)", "② 명료(Alert)", "③ 혼수(Coma)", "④ 기면(Lethargy)"],
+         ["의식이 좋은 상태 → 나쁜 상태 순서로 번호를 조합하세요."])],
+
+      ["단위 환산 투약 계산", "약제실 - g·mg 환산 후 용량 계산",
+       "주입해야 할 용량(mL)을 2자리 숫자로 입력하세요.",
+       ["10"],
+       hCardTwo(["💊 학생 A: 처방", PURPLE, "약물 <strong>0.5 g</strong> 근육주사"],
+                ["💉 학생 B: 약병 규격", EMER, "<strong>250 mg / 5 mL</strong><br>(1 g = 1000 mg)"])],
+
+      ["수혈 시간 기준", "혈액은행 - 수혈 시작·완료 기준",
+       "[수혈 시작 기한(분, 2자리)]과 [수혈 완료 기한(시간, 1자리)]을 이어 3자리 숫자로 입력하세요.",
+       ["304"],
+       hCardTwo(["🩸 학생 A: 수혈 시작", ROSE, "혈액은행에서 혈액을 불출한 후 □□분 이내에 수혈을 시작해야 합니다. (2자리)"],
+                ["⏳ 학생 B: 수혈 완료", AMBER, "혈액 1단위는 늦어도 □시간 이내에 수혈을 마칩니다. (1자리)"])],
+
+      ["격리 종류 분류", "음압격리병동 - 격리 종류 3자리 락",
+       "질환에 필요한 격리 번호를 [첫째·둘째·셋째] 순서대로 이어 3자리로 입력하세요.",
+       ["321"],
+       hCardList("🛡️ 격리 종류 보기", TEAL, ["① 접촉주의", "② 비말주의", "③ 공기주의"],
+         ["[첫째 자리] 폐결핵 환자에게 필요한 격리 번호",
+          "[둘째 자리] 인플루엔자(독감) 환자에게 필요한 격리 번호",
+          "[셋째 자리] MRSA·옴 환자에게 필요한 격리 번호"])],
+
+      ["핍뇨·무뇨 기준", "신장내과 - 소변량 기준",
+       "[핍뇨 기준(3자리)]과 [무뇨 기준(3자리)]을 이어 6자리 숫자로 입력하세요.",
+       ["400100", "500100"],
+       hCardTwo(["🚽 학생 A: 핍뇨", AMBER, "하루 소변량이 □□□ mL 이하이면 핍뇨 (3자리)"],
+                ["🚫 학생 B: 무뇨", ROSE, "하루 소변량이 □□□ mL 이하이면 무뇨 (3자리)"])],
+
+      ["BMI 계산", "영양상담실 - 체질량지수(BMI) 계산",
+       "BMI를 소수점 없이 3자리 숫자로 입력하세요. (예: 21.5 → 215)",
+       ["250"],
+       hCardTwo(["📏 학생 A: 신체 계측", EMER, "키 <strong>160 cm</strong> / 체중 <strong>64 kg</strong>"],
+                ["🧮 학생 B: 공식", SKY, "BMI = 체중(kg) ÷ 키(m)²"])],
+
+      ["영아 기도폐쇄 응급처치", "소아응급실 - 영아 기도폐쇄 처치 횟수",
+       "[등 두드리기 횟수]와 [가슴 압박 횟수]를 이어 2자리로 입력하세요.",
+       ["55"],
+       hCardTwo(["👶 학생 A: 등 두드리기", ROSE, "영아 기도폐쇄 시 등 두드리기 □회 (1자리)"],
+                ["👶 학생 B: 가슴 압박", AMBER, "이어서 시행하는 가슴 압박 □회 (1자리)"])],
+
+      ["정상 임신 기간", "산부인과 외래 - 정상 임신 기간",
+       "[임신 기간(일, 3자리)]과 [임신 기간(주, 2자리)]을 이어 5자리 숫자로 입력하세요.",
+       ["28040"],
+       hCardTwo(["🤰 학생 A: 정상 임신 기간(일)", PINK, "마지막 월경 시작일부터 약 □□□일 (3자리)"],
+                ["🤰 학생 B: 정상 임신 기간(주)", PURPLE, "약 □□주 (2자리)"])],
+
+      ["CPR 깊이·속도 종합", "중환자실 3020호 - CPR 최종 비상 암호!",
+       "아래 4개 값을 차례대로 이어 붙인 8자리 패스코드를 입력하고 탈출하세요!",
+       ["54100120"],
+       hCardList("🚨 CODE BLUE 최종 해제 락", ROSE, [],
+         ["[첫째 자리] 성인 가슴압박 깊이 (약 □cm)",
+          "[둘째 자리] 영아 가슴압박 깊이 (약 □cm)",
+          "[셋째~다섯째 자리] 성인 가슴압박 속도의 하한 (분당 □□□회)",
+          "[여섯째~여덟째 자리] 성인 가슴압박 속도의 상한 (분당 □□□회)"])]
+    ];
+
+    var R3_TRIV = [
+      ["K-POP 연산", "아이돌 멤버 수 연산", "간호사실 로비 - 괄호 연산 퍼즐",
+       "세 그룹의 공식 멤버 수를 떠올려 계산한 2자리 숫자를 입력하세요.",
+       ["81"],
+       hCardOne("🎵 사물함 잠금 공식", PURPLE, "border-purple-800/60",
+         "( 세븐틴 멤버 수 − 에스파 멤버 수 ) × 트와이스 멤버 수 = [ ? ]", "font-jua text-base text-white", "")],
+
+      ["글로벌 K-POP", "노래 제목 초성 퀴즈", "직원 휴게실 - 초성 노래 제목 퀴즈",
+       "초성을 보고 뉴진스의 대표곡 제목 4글자를 한국어로 입력하세요.",
+       ["하입보이", "HYPEBOY", "하이프보이"],
+       hCardOne("🎤 글로벌 히트곡 초성", "text-rose-400", "border-rose-800/60",
+         "ㅎㅇㅂㅇ", "text-3xl font-jua text-amber-300 tracking-widest", "한국어 제목 4글자를 입력하세요.")],
+
+      ["속담 퀴즈", "속담 빈칸 채우기", "의국 휴게실 - 속담 암호",
+       "속담의 빈칸에 들어갈 2글자를 띄어쓰기 없이 입력하세요.",
+       ["제말"],
+       hCardOne("🐯 속담 퀴즈", AMBER, "border-amber-800/60",
+         "호랑이도 [ ? ? ] 하면 온다", "text-xl font-jua text-white", "빈칸 2글자 (띄어쓰기 없이)")],
+
+      ["트렌드 신조어", "라이프스타일 신조어", "보안실 - 신조어 암호",
+       "'God(갓) + 생(生)'을 합쳐 부지런하고 알차게 사는 삶을 뜻하는 신조어 2글자를 입력하세요.",
+       ["갓생"],
+       hCardOne("📱 Z세대 신조어", INDIGO, "border-indigo-800/60",
+         "[ ? ? ] 살기 챌린지", "text-xl font-jua text-indigo-300", "빈칸 2글자를 입력하세요.")],
+
+      ["넌센스", "보석 넌센스 퀴즈", "영양실 - 넌센스 암호",
+       "정답 5글자를 입력하세요.",
+       ["다이아몬드"],
+       hCardOne("💎 넌센스 퀴즈", PINK, "border-pink-800/60",
+         "아몬드가 죽으면?", "text-xl font-jua text-pink-300", "정답 5글자를 입력하세요.")],
+
+      ["혈액형 상식", "응급 수혈 상식", "혈액은행 - 혈액형 상식",
+       "알파벳 1글자(또는 '형' 포함)로 입력하세요.",
+       ["O", "O형"],
+       hCardOne("🩸 혈액형 상식", ROSE, "border-rose-800/60",
+         "응급 시 ABO 혈액형 누구에게나 수혈할 수 있는 '만능 공혈자' 혈액형은?", "text-base font-jua text-white", "A · B · AB · O 중 하나")],
+
+      ["한국 상식", "지리 상식", "방재센터 - 한국 지리 퀴즈",
+       "숫자 1자리를 입력하세요. (세종특별자치시는 제외)",
+       ["6"],
+       hCardOne("🗺️ 한국 상식", SKY, "border-sky-800/60",
+         "부산·대구·인천·광주·대전·울산... 대한민국의 '광역시'는 모두 몇 개일까요?", "text-base font-jua text-white", "숫자 1자리")],
+
+      ["드라마 약칭", "인기 드라마 줄임말", "옥상 정원 - 드라마 약칭",
+       "'응답하라 1988'의 팬들이 부르는 줄임말 2글자를 입력하세요.",
+       ["응팔"],
+       hCardOne("📺 드라마 줄임말", PURPLE, "border-purple-800/60",
+         "응답하라 1988 = [ ? ? ]", "text-xl font-jua text-white", "2글자 약칭을 입력하세요.")]
+    ];
+
+    // ------------------------------ ROUND 4 ------------------------------
+    var R4_CLIN = [
+      ["활력징후 종합 판독", "병동 - 활력징후 종합 판독",
+       "[정상 범위를 벗어난 항목 수(1자리)]와 [맥압(2자리)]을 이어 3자리 숫자로 입력하세요.",
+       ["466"],
+       hCardTwo(["📋 학생 A: 활력징후 차트", ROSE, "체온 38.1℃ / 맥박 104회 / 호흡 22회<br>혈압 168/102 mmHg"],
+                ["📖 학생 B: 정상 기준", TEAL, "체온 36.5~37.5℃ / 맥박 60~100 / 호흡 12~20<br>혈압 140/90 mmHg 미만<br>맥압 = 수축기 − 이완기"])],
+
+      ["영유아 예방접종", "소아과 접종실 - 기본 예방접종 시기·횟수",
+       "[BCG 접종 기한(주, 1자리)] [B형간염 기본접종 횟수(1자리)] [MMR 1차 접종 시작 개월(2자리)]를 차례대로 이어 4자리 숫자로 입력하세요.",
+       ["4312"],
+       hCardTwo(["💉 학생 A: BCG·B형간염", PINK, "BCG(결핵)는 생후 □주 이내 접종 (1자리)<br>B형간염 기본접종은 총 □회 (1자리)"],
+                ["💉 학생 B: MMR", AMBER, "홍역·유행성이하선염·풍진(MMR) 1차 접종은 생후 □□개월부터 (2자리)"])],
+
+      ["맥박 측정 시간 기준", "관찰실 - 맥박 측정 시간 기준",
+       "[규칙적인 맥박일 때 곱하는 수(1자리)]와 [부정맥이 있을 때 측정 시간(초, 2자리)]을 이어 3자리 숫자로 입력하세요.",
+       ["260"],
+       hCardTwo(["⏱️ 학생 A: 규칙적인 맥박", AMBER, "30초 동안 센 맥박수에 □를 곱해 분당 맥박수를 구합니다. (1자리)"],
+                ["⏱️ 학생 B: 불규칙한 맥박(부정맥)", ROSE, "맥박이 불규칙하면 정확한 측정을 위해 □□초 동안 측정합니다. (2자리)"])],
+
+      ["섭취량·배설량(I&O)", "병동 - 24시간 수분 균형",
+       "수분 균형(섭취량 − 배설량, mL)을 3자리 숫자로 입력하세요.",
+       ["350"],
+       hCardTwo(["🥤 학생 A: 24시간 섭취", EMER, "경구 800 mL<br>정맥 수액 1000 mL"],
+                ["🚽 학생 B: 24시간 배설", AMBER, "소변 1100 mL<br>구토물 200 mL<br>배액 150 mL"])],
+
+      ["BMI 계산", "영양상담실 - BMI 계산 2단계",
+       "BMI를 소수점 없이 3자리 숫자로 입력하세요. (예: 21.5 → 215)",
+       ["240"],
+       hCardTwo(["📏 학생 A: 신체 계측", EMER, "키 <strong>150 cm</strong> / 체중 <strong>54 kg</strong>"],
+                ["🧮 학생 B: 공식", SKY, "BMI = 체중(kg) ÷ 키(m)²<br>(150 cm = 1.5 m)"])],
+
+      ["신생아 아프가 점수", "신생아실 - 아프가(Apgar) 점수 판정",
+       "[총점(1자리)]과 [정상 판정 최저점(1자리)]을 이어 2자리 숫자로 입력하세요.",
+       ["67"],
+       hCardTwo(["👶 학생 A: 신생아 1분 관찰", PINK, "• 심박수 분당 100회 이상<br>• 느리고 불규칙한 호흡<br>• 팔다리를 약간 굽힘<br>• 코 자극 시 찡그림<br>• 몸통 분홍색, 손발 푸른색"],
+                ["📖 학생 B: 아프가 점수", SKY, "각 항목 0~2점<br>심박수: 100 이상 2 / 미만 1<br>호흡: 강한 울음 2 / 느리고 불규칙 1<br>근긴장도: 활발 2 / 약간 굴곡 1<br>반사: 울음·기침 2 / 찡그림 1<br>피부색: 전신 분홍 2 / 사지 청색 1<br>정상 판정: 총점 7~10점"])],
+
+      ["화상 체표면적", "화상치료실 - 9의 법칙 응용",
+       "화상 체표면적(%) 합계를 2자리 숫자로 입력하세요.",
+       ["54"],
+       hCardTwo(["🔥 학생 A: 화상 부위", ROSE, "성인 환자<br>머리·얼굴, 왼팔 전체, 몸통 뒷면, 오른쪽 다리 전체"],
+                ["📖 학생 B: 성인 9의 법칙", SKY, "머리·목 9% / 팔 한쪽 9%<br>몸통 앞 18% / 몸통 뒤 18%<br>다리 한쪽 18% / 회음부 1%"])],
+
+      ["욕창 예방 체위변경", "재활병동 - 욕창 예방 체위변경",
+       "[하루 체위변경 횟수(2자리)]와 [욕창 단계 수(1자리)]를 이어 3자리로 입력하세요.",
+       ["124"],
+       hCardTwo(["🛏️ 학생 A: 체위변경 간격", AMBER, "욕창 예방을 위해 □시간마다 체위변경을 합니다.<br>→ 하루(24시간) 총 체위변경 횟수는? (2자리)"],
+                ["📖 학생 B: 욕창 단계", TEAL, "욕창은 피부 손상 정도에 따라 1단계부터 □단계까지 분류합니다. (1자리)"])],
+
+      ["투약 5원칙 사례 판단", "약제실 - 투약 오류 찾기",
+       "[원칙을 어긴 항목 수(1자리)]와 [투약의 기본 원칙 총 개수(1자리)]를 이어 2자리 숫자로 입력하세요.",
+       ["25"],
+       hCardTwo(["📋 학생 A: 투약 상황", ROSE, "• 환자 이름을 확인하지 않고 투약<br>• 약물·용량은 처방과 일치<br>• 처방 시간보다 2시간 늦게 투약<br>• 처방된 경구약을 경구로 투약"],
+                ["📖 학생 B: 투약의 기본 원칙", SKY, "정확한 대상자·약물·용량·시간·경로<br>위 상황에서 어긴 항목은 몇 개일까요?"])],
+
+      ["소변량 기준 계산", "신장내과 - 최소 소변량 계산",
+       "[시간당 최소 소변량(mL, 2자리)]과 [8시간 최소 소변량(mL, 3자리)]을 이어 5자리로 입력하세요.",
+       ["30240"],
+       hCardTwo(["⚖️ 학생 A: 환자 정보", AMBER, "체중 <strong>60 kg</strong><br>최소 소변량 기준: 시간당 <strong>0.5 mL/kg</strong>"],
+                ["🧮 학생 B: 계산", SKY, "시간당 최소 소변량 = 체중 × 0.5<br>8시간 총량 = 시간당 × 8"])],
+
+      ["보호구 착용 순서", "음압격리실 입구 - PPE 착용 시퀀스",
+       "격리실에 들어가기 전, 손위생 후 올바른 착용 순서 번호를 차례대로 나열해 4자리로 입력하세요.",
+       ["3241"],
+       hCardList("🛡️ 보호구 품목 목록", TEAL, ["① 장갑", "② 마스크", "③ 가운", "④ 고글 / 페이스쉴드"],
+         ["가장 먼저 착용하는 것부터 마지막에 착용하는 것까지 번호를 조합하세요."])],
+
+      ["CPR 사이클 계산", "중환자실 4020호 - CPR 최종 비상 암호!",
+       "[가슴압박 총 횟수(3자리)]와 [인공호흡 총 횟수(2자리)]를 이어 5자리 패스코드로 입력하고 탈출하세요!",
+       ["15010"],
+       hCardList("🚨 CODE BLUE 최종 해제 락", ROSE, [],
+         ["성인 2인 구조자가 가슴압박 : 인공호흡 = 30 : 2 로 <strong>5사이클</strong>을 시행했습니다.",
+          "① 5사이클 동안의 가슴압박 총 횟수 (3자리)",
+          "② 5사이클 동안의 인공호흡 총 횟수 (2자리)"])]
+    ];
+
+    var R4_TRIV = [
+      ["K-POP 연산", "아이돌 멤버 수 연산", "간호사실 로비 - 괄호 연산 퍼즐",
+       "세 그룹의 공식 멤버 수를 떠올려 계산한 2자리 숫자를 입력하세요.",
+       ["25"],
+       hCardOne("🎵 사물함 잠금 공식", PURPLE, "border-purple-800/60",
+         "( 세븐틴 − 스트레이키즈 ) × 르세라핌 멤버 수 = [ ? ]", "font-jua text-base text-white", "")],
+
+      ["글로벌 K-POP", "노래 제목 초성 퀴즈", "직원 휴게실 - 초성 노래 제목 퀴즈",
+       "초성을 보고 방탄소년단의 첫 영어 싱글 곡명을 한국어로 입력하세요. (6글자)",
+       ["다이너마이트", "DYNAMITE"],
+       hCardOne("🎤 글로벌 히트곡 초성", "text-rose-400", "border-rose-800/60",
+         "ㄷㅇㄴㅁㅇㅌ", "text-3xl font-jua text-amber-300 tracking-widest", "한국어 제목 6글자를 입력하세요.")],
+
+      ["속담 퀴즈", "속담 빈칸 채우기", "의국 휴게실 - 속담 암호",
+       "속담의 빈칸에 들어갈 2글자를 입력하세요.",
+       ["나무"],
+       hCardOne("🐒 속담 퀴즈", AMBER, "border-amber-800/60",
+         "원숭이도 [ ? ? ]에서 떨어진다", "text-xl font-jua text-white", "빈칸 2글자를 입력하세요.")],
+
+      ["트렌드 신조어", "줄임말 신조어", "보안실 - 신조어 암호",
+       "줄임말 3글자를 입력하세요.",
+       ["점메추"],
+       hCardOne("📱 Z세대 신조어", INDIGO, "border-indigo-800/60",
+         "'점심 메뉴 추천'의 줄임말은?", "text-xl font-jua text-indigo-300", "3글자를 입력하세요.")],
+
+      ["넌센스", "바다 넌센스 퀴즈", "영양실 - 넌센스 암호",
+       "정답 3글자를 입력하세요.",
+       ["열바다"],
+       hCardOne("🌊 넌센스 퀴즈", PINK, "border-pink-800/60",
+         "세상에서 가장 뜨거운 바다는?", "text-xl font-jua text-pink-300", "정답 3글자를 입력하세요.")],
+
+      ["인체 상식", "뼈 이름 퀴즈", "해부학 실습실 - 뼈 이름 암호",
+       "정답 3글자를 입력하세요. (한자어 이름)",
+       ["대퇴골", "넙다리뼈"],
+       hCardOne("🦴 인체 상식", SKY, "border-sky-800/60",
+         "인체에서 가장 길고 굵은 뼈는?", "text-xl font-jua text-sky-300", "3글자를 입력하세요. (허벅지 뼈)")],
+
+      ["영화 상식", "한국 영화 상식", "시청각실 - 영화 퀴즈",
+       "감독 이름 3글자를 입력하세요.",
+       ["봉준호"],
+       hCardOne("🎬 한국 영화 상식", PURPLE, "border-purple-800/60",
+         "영화 〈기생충〉을 만든 감독은?", "text-xl font-jua text-white", "3글자를 입력하세요.")],
+
+      ["한글날 상식", "한글 상식 계산", "도서실 - 한글 상식 계산",
+       "계산한 2자리 숫자를 입력하세요.",
+       ["24"],
+       hCardOne("🇰🇷 한글날 상식", EMER, "border-emerald-800/60",
+         "한글의 기본 자음 수 + 기본 모음 수 = [ ? ]", "text-xl font-jua text-emerald-300", "2자리 숫자")]
+    ];
+
+    // ------------------------------ ROUND 5 ------------------------------
+    var R5_CLIN = [
+      ["쇼크 사례 판독", "응급실 - 맥압과 저혈압 기준",
+       "[맥압(2자리)]과 [성인 저혈압 기준 수축기압(2자리)]을 이어 4자리 숫자로 입력하세요.",
+       ["3290"],
+       hCardTwo(["📋 학생 A: 쇼크 의심 환자", ROSE, "혈압 <strong class='text-rose-400'>82 / 50 mmHg</strong><br>맥박 128회 / 호흡 28회"],
+                ["📖 학생 B: 기준", SKY, "맥압 = 수축기 − 이완기<br>성인 저혈압: 수축기 혈압 □□ mmHg 미만 (2자리)"])],
+
+      ["태아 심박동 기준", "분만실 - 태아 심박동 정상 범위",
+       "[태아 정상 심박동수 하한(3자리)]과 [상한(3자리)]을 이어 6자리 숫자로 입력하세요.",
+       ["120160"],
+       hCardTwo(["🤰 학생 A: 하한", PINK, "정상 태아 심박동수의 하한은 분당 □□□회입니다. (3자리)"],
+                ["🤰 학생 B: 상한", PURPLE, "정상 태아 심박동수의 상한은 분당 □□□회입니다. (3자리)"])],
+
+      ["응급환자 분류 우선순위", "응급센터 - 중증도 분류(Triage) 우선순위",
+       "먼저 처치해야 하는 환자부터 가장 나중에 처치하는 환자까지 번호를 순서대로 나열해 4자리로 입력하세요.",
+       ["3412"],
+       hCardList("🚑 중증도 분류 보기", ROSE, ["① 비응급 환자(녹색)", "② 사망·소생 불가 환자(흑색)", "③ 긴급 환자(적색)", "④ 응급 환자(황색)"],
+         ["처치 우선순위가 높은 순서대로 번호를 조합하세요."])],
+
+      ["분만 예정일 계산(네겔레 법칙)", "산부인과 외래 - 분만 예정일 계산",
+       "분만 예정일의 [월(2자리)]과 [일(2자리)]을 이어 4자리 숫자로 입력하세요. (예: 4월 5일 → 0405)",
+       ["1217"],
+       hCardTwo(["🤰 학생 A: 임부 정보", PINK, "마지막 월경 시작일(LMP): <strong>3월 10일</strong>"],
+                ["🧮 학생 B: 네겔레 법칙", SKY, "마지막 월경 시작일의 <strong>월에서 3을 빼고(또는 9를 더하고)</strong>, <strong>일에 7을 더합니다.</strong><br>(월이 0이 되면 12월)"])],
+
+      ["영아 체중 성장", "소아과 외래 - 영아 체중 증가 계산",
+       "[생후 5개월 체중(2자리)]과 [만 1세 체중(3자리)]을 소수점 없이 이어 5자리로 입력하세요. (예: 6.8 kg → 68)",
+       ["68102"],
+       hCardTwo(["👶 학생 A: 생후 5개월", PINK, "출생 체중 <strong>3.4 kg</strong><br>생후 5개월에는 출생 체중의 □배가 됩니다.<br>→ 체중은? (소수점 없이 2자리)"],
+                ["📈 학생 B: 만 1세", AMBER, "같은 영아가 생후 12개월에는 출생 체중의 □배가 됩니다.<br>→ 체중은? (소수점 없이 3자리)"])],
+
+      ["ABO 혈액형 수혈 적합성", "혈액은행 - 적혈구 수혈 적합 혈액형",
+       "[AB형 환자]·[O형 환자]·[A형 환자]가 받을 수 있는 적혈구 혈액형의 종류 수를 차례대로 이어 3자리로 입력하세요.",
+       ["412"],
+       hCardTwo(["🩸 학생 A: AB형·O형 환자", ROSE, "AB형 환자가 받을 수 있는 적혈구 혈액형은 □종류<br>O형 환자가 받을 수 있는 적혈구 혈액형은 □종류"],
+                ["🩸 학생 B: A형 환자", SKY, "A형 환자가 받을 수 있는 적혈구 혈액형은 □종류<br>(Rh 인자는 무시하고 ABO형만 생각하세요)"])],
+
+      ["체온 부위 통합 환산", "처치실 - 구강 체온으로 통일하기",
+       "[겨드랑이 → 구강 환산값(3자리)]과 [직장 → 구강 환산값(3자리)]을 소수점 없이 이어 6자리로 입력하세요.",
+       ["373376"],
+       hCardTwo(["🌡️ 학생 A: 겨드랑이 체온", SKY, "겨드랑이에서 측정 <strong>36.8 ℃</strong><br>→ 구강 체온으로 환산하면? (예: 36.5 → 365)"],
+                ["🌡️ 학생 B: 직장 체온", ROSE, "직장에서 측정 <strong>38.1 ℃</strong><br>→ 구강 체온으로 환산하면? (예: 36.5 → 365)"])],
+
+      ["약물 단위 환산", "약제실 - mg·mcg·g 단위 환산",
+       "[mcg 값(3자리)]과 [mg 값(3자리)]을 이어 6자리 숫자로 입력하세요.",
+       ["125500"],
+       hCardTwo(["💊 학생 A: 처방 1", PURPLE, "디곡신 <strong>0.125 mg</strong> → □□□ mcg<br>(1 mg = 1000 mcg)"],
+                ["💊 학생 B: 처방 2", EMER, "아세트아미노펜 <strong>0.5 g</strong> → □□□ mg<br>(1 g = 1000 mg)"])],
+
+      ["활력징후 분당 환산", "병동 - 맥박·호흡 분당 환산 후 연결",
+       "[분당 맥박수(3자리)]와 [분당 호흡수(2자리)]를 이어 5자리로 입력하세요.",
+       ["10822"],
+       hCardTwo(["⏱️ 학생 A: 맥박", AMBER, "15초 동안 맥박 <strong>27회</strong><br>→ 분당 맥박수는? (3자리)"],
+                ["⏱️ 학생 B: 호흡", TEAL, "30초 동안 호흡 <strong>11회</strong><br>→ 분당 호흡수는? (2자리)"])],
+
+      ["투약 시간 계산(24시간제)", "병동 약제실 - q8h 투약 스케줄",
+       "[하루 투약 횟수(1자리)]와 [세 번째 투약 시각(24시간제 4자리)]을 이어 5자리로 입력하세요.",
+       ["32200"],
+       hCardTwo(["⏰ 학생 A: 처방", AMBER, "항생제 <strong>q8h</strong> (8시간마다)<br>첫 투약 <strong>06:00</strong>"],
+                ["🧮 학생 B: 입력 형식", TEAL, "① 하루(24시간) 투약 횟수<br>② 세 번째 투약 시각 (예: 오후 3시 → 1500)"])],
+
+      ["신생아 체중·호흡", "신생아실 - 생리적 체중 감소와 정상 호흡",
+       "[체중 감소 최대량(g, 3자리)]과 [신생아 정상 호흡수 하한(2자리)]을 이어 5자리로 입력하세요.",
+       ["32030"],
+       hCardTwo(["👶 학생 A: 신생아 체중", PINK, "출생 체중 <strong>3200 g</strong><br>생후 1주 내 생리적 체중 감소는 최대 <strong>10%</strong>까지 정상"],
+                ["🫁 학생 B: 신생아 호흡", SKY, "신생아 정상 호흡수는 분당 □□ ~ 60회입니다. (하한 2자리)"])],
+
+      ["CPR·기도폐쇄 종합 패스코드", "중환자실 5020호 - 최종 비상 암호!",
+       "아래 값을 차례대로 이어 붙인 6자리 패스코드를 입력하고 최종 탈출하세요!",
+       ["455119"],
+       hCardList("🚨 CODE BLUE 마지막 해제 락", ROSE, [],
+         ["[첫째 자리] 영아 가슴압박 깊이 (약 □cm)",
+          "[둘째 자리] 영아 기도폐쇄 시 등 두드리기 횟수 (□회)",
+          "[셋째 자리] 영아 기도폐쇄 시 가슴 밀어내기 횟수 (□회)",
+          "[넷째~여섯째 자리] 대한민국 응급의료·구조 신고 번호"])]
+    ];
+
+    var R5_TRIV = [
+      ["K-POP 연산", "아이돌 멤버 수 연산", "간호사실 로비 - 복합 연산 퍼즐",
+       "네 그룹의 공식 멤버 수를 떠올려 계산한 2자리 숫자를 입력하세요.",
+       ["60"],
+       hCardOne("🎵 사물함 잠금 공식", PURPLE, "border-purple-800/60",
+         "( BTS × 트와이스 ) − ( 블랙핑크 × 에스파 ) + 세븐틴 = [ ? ]<br><span class='text-xs text-slate-400'>※ 각 값은 그룹의 멤버 수</span>", "font-jua text-base text-white", "")],
+
+      ["글로벌 K-POP", "노래 제목 초성 퀴즈", "직원 휴게실 - 초성 노래 제목 퀴즈",
+       "초성을 보고 걸그룹 에스파의 2024년 곡명을 한국어로 입력하세요. (4글자)",
+       ["슈퍼노바", "SUPERNOVA"],
+       hCardOne("🎤 글로벌 히트곡 초성", "text-rose-400", "border-rose-800/60",
+         "ㅅㅍㄴㅂ", "text-3xl font-jua text-amber-300 tracking-widest", "한국어 제목 4글자를 입력하세요.")],
+
+      ["속담 퀴즈", "속담 빈칸 채우기", "의국 휴게실 - 속담 암호",
+       "속담의 빈칸에 들어갈 3글자를 입력하세요.",
+       ["개구리"],
+       hCardOne("🐸 속담 퀴즈", AMBER, "border-amber-800/60",
+         "우물 안 [ ? ? ? ]", "text-xl font-jua text-white", "빈칸 3글자를 입력하세요.")],
+
+      ["트렌드 영어 약어", "SNS 약어", "보안실 - 약어 암호",
+       "영어 단어(대소문자 무관) 또는 한글 뜻 중 하나로 입력하세요.",
+       ["INFORMATION", "정보", "인포메이션"],
+       hCardOne("📱 SNS 약어 퀴즈", INDIGO, "border-indigo-800/60",
+         "TMI = Too Much [ ? ]", "text-xl font-jua text-indigo-300", "빈칸 단어를 입력하세요.")],
+
+      ["넌센스", "동물 넌센스 퀴즈", "영양실 - 넌센스 암호",
+       "정답 2글자를 입력하세요.",
+       ["언덕"],
+       hCardOne("🦆 넌센스 퀴즈", PINK, "border-pink-800/60",
+         "오리가 얼면?", "text-xl font-jua text-pink-300", "정답 2글자를 입력하세요.")],
+
+      ["인체 상식", "인체 상식 숫자 퀴즈", "해부학 실습실 - 뼈 개수 암호",
+       "숫자 3자리를 입력하세요.",
+       ["206"],
+       hCardOne("🦴 인체 상식", SKY, "border-sky-800/60",
+         "성인의 뼈는 모두 몇 개일까요?", "text-xl font-jua text-sky-300", "숫자 3자리")],
+
+      ["한국사 상식", "한글 반포 연도", "도서실 - 역사 퀴즈",
+       "서기 연도 4자리를 입력하세요.",
+       ["1446"],
+       hCardOne("📜 한국사 상식", EMER, "border-emerald-800/60",
+         "훈민정음(한글)이 세상에 반포된 해는? (세종 28년)", "text-base font-jua text-emerald-300", "서기 4자리")],
+
+      ["드라마 약칭", "인기 드라마 줄임말", "옥상 정원 - 드라마 약칭",
+       "'슬기로운 감빵생활'의 팬들이 부르는 줄임말 3글자를 입력하세요.",
+       ["슬감빵"],
+       hCardOne("📺 드라마 줄임말", PURPLE, "border-purple-800/60",
+         "슬기로운 감빵생활 = [ ? ? ? ]", "text-xl font-jua text-white", "3글자 약칭을 입력하세요.")]
+    ];
+
+    var ROUNDS = {
+      1: {
+        title: '병동 입문', level: '기초', timeMin: 40,
+        key: '도파민디톡스로뇌피로싹날리고꿀잠충전해!',
+        clearTitle: '최신 청소년 뇌 건강 & 글림파틱(Glymphatic) 상식',
+        clearBody: '숏폼 영상과 자극적인 디지털 미디어는 전두엽의 도파민 수용체를 피로하게 만듭니다. 수면 중에 뇌 속 노폐물을 청소하는 <strong>글림파틱 세척 시스템</strong>이 원활하게 작동하려면 잠들기 1시간 전 스마트폰 블루라이트를 끄고 질 좋은 수면(꿀잠)을 취하는 \'디지털 디톡스\'가 최고의 뇌 영양제입니다!',
+        stages: null // 아래에서 STAGES_R1 연결
+      },
+      2: {
+        title: '기본기 다지기', level: '초급', timeMin: 40,
+        key: '손씻기는감염예방의가장쉽고중요한첫걸음!',
+        clearTitle: '손위생 5계기, 기억하나요?',
+        clearBody: '손위생은 의료관련감염을 막는 가장 기본적이고 효과적인 방법입니다. <strong>환자 접촉 전 → 청결/무균 처치 전 → 체액 노출 위험 후 → 환자 접촉 후 → 환자 주변 환경 접촉 후</strong>, 이 5가지 계기를 꼭 기억하세요!',
+        stages: buildRound(R2_CLIN, R2_TRIV)
+      },
+      3: {
+        title: '계산·분류 실습', level: '중급', timeMin: 40,
+        key: '환자확인과투약5원칙이안전한간호의시작!',
+        clearTitle: '투약 오류를 막는 안전 습관',
+        clearBody: '투약 전에는 환자의 <strong>이름과 등록번호 두 가지</strong>로 환자를 확인하고, 투약의 기본 원칙(정확한 환자·약물·용량·시간·경로)을 매번 확인하는 것이 오류를 막는 가장 확실한 방법입니다. 계산은 두 번, 확인은 한 번 더!',
+        stages: buildRound(R3_CLIN, R3_TRIV)
+      },
+      4: {
+        title: '사례 판독', level: '중상급', timeMin: 40,
+        key: '작은변화도놓치지않는관찰이환자를지킨다!',
+        clearTitle: '관찰의 힘: 수치보다 변화',
+        clearBody: '활력징후는 숫자 하나보다 <strong>이전 값과 비교한 변화 추이</strong>가 더 중요한 경우가 많습니다. 이상 수치를 발견하면 혼자 판단하지 말고 즉시 보고하고 정확히 기록하는 것이 환자를 지키는 첫걸음입니다.',
+        stages: buildRound(R4_CLIN, R4_TRIV)
+      },
+      5: {
+        title: '종합 응급 사례', level: '최상급', timeMin: 40,
+        key: '우리는환자의생명을지키는최고의간호인재!',
+        clearTitle: '최종 라운드 클리어! 임상 역량 마스터',
+        clearBody: '응급 상황에서는 <strong>침착한 판단, 정확한 계산, 신속한 보고와 협력</strong>이 생명을 살립니다. 5라운드 100개 관문을 해낸 여러분의 역량은 곧 실습과 현장에서 큰 자신감이 될 거예요!',
+        stages: buildRound(R5_CLIN, R5_TRIV)
+      }
+    };
+    ROUNDS[1].stages = STAGES_R1;
+
+    var STAGES = ROUNDS[1].stages;
+    var MASTER_KEY_WORD = ROUNDS[1].key;
+    var myRound = 1;
+    var currentServerRound = 1;
+
+    // 상태 변수
+    var currentStage = 1;
+    var myTeamName = "1조";
+    var timerSeconds = 40 * 60;
+    var timerInterval = null;
+    var isSoundMuted = true;
+    var isTeacherMode = false;
+
+    // DOM 캐싱
+    var viewLobby = document.getElementById('view-student-lobby');
+    var viewGameplay = document.getElementById('view-gameplay');
+    var viewGameClear = document.getElementById('view-game-clear');
+    var viewTeacherDashboard = document.getElementById('view-teacher-dashboard');
+
+    var lobbyStartPasscode = document.getElementById('lobby-start-passcode');
+    var lobbyCodeError = document.getElementById('lobby-code-error');
+    var btnStartGame = document.getElementById('btn-start-game');
+    var p2pSyncStatus = document.getElementById('p2p-sync-status');
+
+    var headerTimerWrap = document.getElementById('header-timer-wrap');
+    var timerDisplay = document.getElementById('timer-display');
+    var soundToggleBtn = document.getElementById('btn-sound-toggle');
+    var soundIcon = document.getElementById('sound-icon');
+    var btnToggleTeacherMode = document.getElementById('btn-toggle-teacher-mode');
+    var teacherModeBtnText = document.getElementById('teacher-mode-btn-text');
+
+    var teacherCustomPasscode = document.getElementById('teacher-custom-passcode');
+    var btnSaveTeacherPasscode = document.getElementById('btn-save-teacher-passcode');
+    var btnResetSession = document.getElementById('btn-reset-session');
+    var teacherTeamCardsGrid = document.getElementById('teacher-team-cards-grid');
+    var activeTeamsCountBadge = document.getElementById('active-teams-count-badge');
+
+    var stageBadge = document.getElementById('stage-badge');
+    var stageCategoryBadge = document.getElementById('stage-category-badge');
+    var playerTeamLabel = document.getElementById('player-team-label');
+    var rolePairLabel = document.getElementById('role-pair-label');
+    var keySlotsContainer = document.getElementById('key-slots-container');
+    var keyProgressCounter = document.getElementById('key-progress-counter');
+    var roomNameEl = document.getElementById('room-name');
+    var stageDiffEl = document.getElementById('stage-diff');
+    var missionInstructionText = document.getElementById('mission-instruction-text');
+    var stageInteractiveArea = document.getElementById('stage-interactive-area');
+    var passcodeInput = document.getElementById('passcode-input');
+    var btnSubmitCode = document.getElementById('btn-submit-code');
+    var codeFeedbackMsg = document.getElementById('code-feedback-msg');
+    var btnRestartGame = document.getElementById('btn-restart-game');
+
+    // ----------------------------------------------------
+    // 실시간 P2P 통신 로직 (선생님 컴퓨터 = Host, 학생 기기 = Client)
+    // ----------------------------------------------------
+    // ----------------------------------------------------
+    // 구글 서버(GAS) 통신: 학생 -> 서버 -> 교사 관제탑 (폴링 방식, 안정적)
+    // ----------------------------------------------------
+    var teacherHostState = { text: '관제 서버 연결 중...', ok: false };
+
+    function api(params, timeoutMs) {
+      return new Promise(function(resolve, reject) {
+        if (!API_URL || API_URL.indexOf('PASTE_') === 0) { reject(new Error('NO_API_URL')); return; }
+        var qs = Object.keys(params).map(function(k) {
+          return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+        }).join('&');
+        var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        var timer = setTimeout(function() { if (ctrl) ctrl.abort(); reject(new Error('TIMEOUT')); }, timeoutMs || 10000);
+        fetch(API_URL + (API_URL.indexOf('?') > -1 ? '&' : '?') + qs + '&_t=' + Date.now(), ctrl ? { signal: ctrl.signal } : {})
+          .then(function(r) { return r.json(); })
+          .then(function(j) { clearTimeout(timer); resolve(j); })
+          .catch(function(e) { clearTimeout(timer); reject(e); });
+      });
+    }
+
+    function setStudentSyncStatus(html) {
+      if (p2pSyncStatus) p2pSyncStatus.innerHTML = html;
+    }
+
+    function setSyncDot(ok) {
+      var d = document.getElementById('sync-dot');
+      if (!d) return;
+      d.className = 'w-2 h-2 rounded-full inline-block ' + (ok ? 'bg-emerald-400' : 'bg-rose-500 animate-pulse');
+      d.title = ok ? '관제탑 전송 정상' : '관제탑 전송 실패 - 자동 재시도 중';
+    }
+
+    function setTeacherHostState(text, ok) {
+      teacherHostState = { text: text, ok: ok };
+      var el = document.getElementById('teacher-host-status');
+      if (el) {
+        el.innerHTML = '<span class="' + (ok ? 'text-emerald-400' : 'text-amber-400') + '">● ' + text + '</span>';
+      }
+    }
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    // 학생: 내 진행 상황을 서버로 전송 (실패해도 8초마다 자동 재전송)
+    function sendProgress() {
+      if (!myProgress || !myEpoch) return;
+      api({
+        action: 'progress', round: myRound, team: myTeamName, stage: myProgress.stage,
+        members: myProgress.members, epoch: myEpoch
+      }, 8000).then(function(res) {
+        if (res && res.reset) { location.reload(); return; }
+        setSyncDot(!!(res && res.ok));
+      }).catch(function() { setSyncDot(false); });
+    }
+
+    function syncMyTeamProgress(stageNum, isActive, membersStr) {
+      if (!myTeamName) return;
+      myProgress = {
+        active: isActive !== undefined ? isActive : true,
+        stage: stageNum || currentStage,
+        members: membersStr || (myProgress && myProgress.members) || (rolePairLabel ? rolePairLabel.textContent : "")
+      };
+      sendProgress();
+    }
+
+    setInterval(function() {
+      if (!isTeacherMode && myProgress && myProgress.active) sendProgress();
+    }, 8000);
+
+    // 교사: 3초마다 서버에서 전체 현황 가져오기
+    function pollTeacherState() {
+      api({ action: 'state', pin: teacherPin }, 8000).then(function(res) {
+        if (!res || !res.ok) {
+          setTeacherHostState(res && res.reason === 'pin' ? '교사 비밀번호가 올바르지 않습니다' : '서버 오류', false);
+          renderTeacherDashboard();
+          return;
+        }
+        teamsProgress = res.teams || {};
+        serverNowMs = res.now;
+        currentMasterStartCode = res.code;
+        currentServerRound = res.round || 1;
+        var rNow = document.getElementById('teacher-round-now');
+        if (rNow) rNow.textContent = '현재 진행: ROUND ' + currentServerRound + ' · ' + ROUNDS[currentServerRound].title;
+        var rSel = document.getElementById('teacher-round-select');
+        if (rSel && document.activeElement !== rSel) rSel.value = String(currentServerRound);
+        if (teacherCustomPasscode && document.activeElement !== teacherCustomPasscode) {
+          teacherCustomPasscode.value = res.code;
+        }
+        var d = new Date();
+        setTeacherHostState('관제 서버 연결됨 · 마지막 갱신 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds()), true);
+        renderTeacherDashboard();
+      }).catch(function(e) {
+        setTeacherHostState(e && e.message === 'NO_API_URL' ? 'API_URL이 설정되지 않았습니다 (index.html 상단 API_URL 확인)' : '서버 응답 없음 - 재시도 중...', false);
+        renderTeacherDashboard();
+      });
+    }
+
+    function startTeacherPolling() {
+      stopTeacherPolling();
+      pollTeacherState();
+      teacherPollTimer = setInterval(pollTeacherState, 3000);
+    }
+
+    function stopTeacherPolling() {
+      if (teacherPollTimer) { clearInterval(teacherPollTimer); teacherPollTimer = null; }
+    }
+
+    // 20글자 마스터 키 슬롯 렌더링
+    function renderKeySlots() {
+      if (!keySlotsContainer) return;
+      keySlotsContainer.innerHTML = '';
+      var letters = Array.from(MASTER_KEY_WORD);
+
+      letters.forEach(function(char, idx) {
+        var isUnlocked = idx < (currentStage - 1);
+        var slot = document.createElement('div');
+        slot.className = 'h-7 rounded-lg flex items-center justify-center font-jua text-xs transition border ' + (
+          isUnlocked 
+            ? 'bg-amber-500 text-slate-950 font-black border-amber-300 shadow-sm' 
+            : 'bg-slate-900 text-slate-600 border-slate-800'
+        );
+        slot.textContent = isUnlocked ? char : String(idx + 1);
+        keySlotsContainer.appendChild(slot);
+      });
+
+      if (keyProgressCounter) {
+        keyProgressCounter.textContent = Math.min(currentStage - 1, 20) + ' / 20 글자';
+      }
+    }
+
+    // 관제탑 렌더링
+    function renderTeacherDashboard() {
+      if (!teacherTeamCardsGrid) return;
+      setTeacherHostState(teacherHostState.text, teacherHostState.ok);
+      teacherTeamCardsGrid.innerHTML = '';
+
+      var activeTeamNames = Object.keys(teamsProgress).filter(function(tName) {
+        return teamsProgress[tName] && teamsProgress[tName].active;
+      });
+
+      if (activeTeamsCountBadge) {
+        activeTeamsCountBadge.innerHTML = '접속 완료: <span class="text-emerald-400 font-bold">' + activeTeamNames.length + '조</span> / 6조';
+      }
+
+      if (activeTeamNames.length === 0) {
+        teacherTeamCardsGrid.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500 text-xs font-bold flex flex-col items-center justify-center gap-3">' +
+          '<i class="ph-bold ph-hourglass-medium text-3xl text-amber-400 animate-pulse"></i>' +
+          '<span>아직 대기실에서 입장한 조가 없습니다.<br>학생들이 태블릿에서 시작 비밀번호를 입력하고 입장하면 실시간으로 여기에 뜹니다.</span>' +
+        '</div>';
+        return;
+      }
+
+      activeTeamNames.sort();
+
+      activeTeamNames.forEach(function(tName) {
+        var tData = teamsProgress[tName];
+        var stageNum = tData.stage || 1;
+        var pct = Math.min(Math.round(((stageNum - 1) / 20) * 100), 100);
+        var isClear = stageNum > 20;
+        var agoSec = tData.ts ? Math.max(0, Math.round((serverNowMs - tData.ts) / 1000)) : 0;
+        var isStale = !isClear && agoSec > 30;
+        var clearRank = 0;
+        if (isClear) {
+          clearRank = activeTeamNames.filter(function(n) {
+            var o = teamsProgress[n];
+            return o && o.stage > 20 && (o.clearTs || 0) < (tData.clearTs || 0);
+          }).length + 1;
+        }
+
+        var card = document.createElement('div');
+        card.className = 'bg-slate-950/90 p-4 rounded-2xl border ' + (isClear ? 'border-amber-400/80 shadow-lg shadow-amber-500/10' : 'border-slate-800') + ' flex flex-col justify-between gap-3';
+        card.innerHTML = 
+          '<div class="flex items-center justify-between">' +
+            '<div class="flex items-center gap-2">' +
+              '<span class="w-3 h-3 rounded-full ' + (isClear ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse') + '"></span>' +
+              '<strong class="text-base font-bold text-white">' + tName + '</strong>' +
+              '<span class="text-xs text-slate-400">(' + (tData.members || "학생") + ')</span>' +
+              (isStale ? '<span class="text-[10px] font-bold text-rose-400 bg-rose-950/60 border border-rose-800 rounded px-1.5 py-0.5">⚠ ' + agoSec + '초째 신호 없음</span>' : '') +
+            '</div>' +
+            '<span class="text-xs font-mono font-bold ' + (isClear ? 'text-amber-400' : 'text-emerald-400') + '">' +
+              (isClear ? '🎉 탈출 성공! (' + clearRank + '등)' : stageNum + ' / 20 관문 (' + pct + '%)') +
+            '</span>' +
+          '</div>' +
+          '<div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-800">' +
+            '<div class="h-full ' + (isClear ? 'bg-gradient-to-r from-amber-400 to-yellow-300' : 'bg-gradient-to-r from-emerald-500 to-teal-400') + ' transition-all duration-500" style="width: ' + (isClear ? 100 : pct) + '%;"></div>' +
+          '</div>';
+
+        teacherTeamCardsGrid.appendChild(card);
+      });
+    }
+
+    // 스테이지 로딩
+    function loadStage(stageNum) {
+      if (stageNum > 20) {
+        finishGame();
+        return;
+      }
+      currentStage = stageNum;
+      syncMyTeamProgress(stageNum, true);
+
+      var data = STAGES[stageNum];
+      if (!data) return;
+
+      if (stageBadge) stageBadge.textContent = 'R' + myRound + ' · STAGE ' + String(stageNum).padStart(2, '0') + ' / 20';
+      if (stageCategoryBadge) stageCategoryBadge.textContent = data.category;
+      if (stageDiffEl) stageDiffEl.textContent = data.diff;
+      if (roomNameEl) {
+        var titleSpan = roomNameEl.querySelector('span');
+        if (titleSpan) titleSpan.textContent = data.roomName;
+      }
+      if (missionInstructionText) missionInstructionText.textContent = data.instruction;
+      if (stageInteractiveArea) stageInteractiveArea.innerHTML = data.render();
+
+      if (passcodeInput) {
+        passcodeInput.value = '';
+        passcodeInput.focus();
+      }
+      if (codeFeedbackMsg) codeFeedbackMsg.classList.add('hidden');
+      renderKeySlots();
+    }
+
+    // 정답 체크
+    function checkPasscode() {
+      if (!passcodeInput) return;
+      var input = passcodeInput.value.trim().toUpperCase().replace(/\s+/g, '');
+      var stageData = STAGES[currentStage];
+      if (!input || !stageData) return;
+
+      var isCorrect = stageData.correctCodes.some(function(c) {
+        return c.toUpperCase() === input;
+      });
+
+      if (isCorrect) {
+        if (codeFeedbackMsg) codeFeedbackMsg.classList.add('hidden');
+        loadStage(currentStage + 1);
+      } else {
+        if (codeFeedbackMsg) codeFeedbackMsg.classList.remove('hidden');
+        passcodeInput.classList.add('border-rose-500');
+        setTimeout(function() {
+          passcodeInput.classList.remove('border-rose-500');
+        }, 700);
+      }
+    }
+
+    // 타이머
+    function startTimer() {
+      if (headerTimerWrap) {
+        headerTimerWrap.classList.remove('hidden');
+        headerTimerWrap.classList.add('flex');
+      }
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(function() {
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          if (timerDisplay) timerDisplay.textContent = "00:00";
+          return;
+        }
+        timerSeconds--;
+        var mins = Math.floor(timerSeconds / 60);
+        var secs = timerSeconds % 60;
+        if (timerDisplay) {
+          timerDisplay.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
+      }, 1000);
+    }
+
+    // 게임 완료
+    function finishGame() {
+      if (timerInterval) clearInterval(timerInterval);
+      syncMyTeamProgress(21, true);
+
+      if (viewGameplay) viewGameplay.classList.add('hidden');
+      if (viewGameClear) viewGameClear.classList.remove('hidden');
+      var rd = ROUNDS[myRound];
+      var ck = document.getElementById('clear-key-text'); if (ck) ck.textContent = '[ ' + rd.key + ' ]';
+      var ct = document.getElementById('clear-info-title'); if (ct) ct.innerHTML = '<i class="ph-bold ph-brain text-sm"></i> ' + rd.clearTitle;
+      var cb = document.getElementById('clear-info-body'); if (cb) cb.innerHTML = rd.clearBody;
+      var cr = document.getElementById('clear-round-label'); if (cr) cr.textContent = '🎉 ROUND ' + myRound + ' · 20개 구역 올클리어! 🎉';
+      var clearTeamEl = document.getElementById('clear-team-name');
+      if (clearTeamEl) clearTeamEl.textContent = myTeamName;
+    }
+
+    // 이벤트 리스너 바인딩
+    function showLobbyError(msg) {
+      if (!lobbyCodeError) return;
+      lobbyCodeError.innerHTML = '<i class="ph-bold ph-warning"></i> ' + msg;
+      lobbyCodeError.classList.remove('hidden');
+      if (lobbyStartPasscode) {
+        lobbyStartPasscode.classList.add('border-rose-500');
+        setTimeout(function() { lobbyStartPasscode.classList.remove('border-rose-500'); }, 700);
+      }
+    }
+
+    var isJoining = false;
+    if (btnStartGame) {
+      btnStartGame.addEventListener('click', function() {
+        if (isJoining) return;
+        var entered = lobbyStartPasscode ? lobbyStartPasscode.value.trim() : '';
+        var teamSelect = document.getElementById('lobby-team-name');
+        var team = teamSelect ? teamSelect.value : "1조";
+        var inputA = document.getElementById('lobby-student-a');
+        var inputB = document.getElementById('lobby-student-b');
+        var nameA = (inputA && inputA.value.trim()) ? inputA.value.trim() : "학생A";
+        var nameB = (inputB && inputB.value.trim()) ? inputB.value.trim() : "학생B";
+        var membersStr = nameA + " / " + nameB;
+
+        if (!entered) { showLobbyError('시작 비밀번호를 입력하세요.'); return; }
+
+        isJoining = true;
+        btnStartGame.disabled = true;
+        var labelEl = btnStartGame.querySelector('span');
+        var labelOrig = labelEl ? labelEl.textContent : '';
+        if (labelEl) labelEl.textContent = '확인 중...';
+        if (lobbyCodeError) lobbyCodeError.classList.add('hidden');
+
+        api({ action: 'join', code: entered, team: team, members: membersStr }, 15000).then(function(res) {
+          if (!res || !res.ok) {
+            if (res && res.reason === 'code') showLobbyError('비밀번호가 일치하지 않습니다! 선생님 말씀을 확인하세요.');
+            else if (res && res.reason === 'taken') showLobbyError('이미 다른 학생(' + (res.members || '') + ')이 사용 중인 조입니다. 조 번호를 확인하세요.');
+            else showLobbyError('서버 오류가 발생했습니다. 잠시 후 다시 눌러주세요.');
+            return;
+          }
+
+          myTeamName = team;
+          myEpoch = res.epoch;
+          myRound = res.round || 1;
+          STAGES = ROUNDS[myRound].stages;
+          MASTER_KEY_WORD = ROUNDS[myRound].key;
+          myProgress = { active: true, stage: res.stage || 1, members: membersStr };
+          var elapsed = Math.floor((res.now - res.startTs) / 1000);
+          timerSeconds = Math.max(0, ROUNDS[myRound].timeMin * 60 - elapsed);
+
+          if (playerTeamLabel) playerTeamLabel.textContent = myTeamName;
+          if (rolePairLabel) rolePairLabel.textContent = membersStr;
+          if (viewLobby) viewLobby.classList.add('hidden');
+          if (viewGameplay) viewGameplay.classList.remove('hidden');
+
+          if (myProgress.stage > 20) {
+            finishGame();
+          } else {
+            loadStage(myProgress.stage);
+            startTimer();
+          }
+        }).catch(function(e) {
+          if (e && e.message === 'NO_API_URL') showLobbyError('서버 주소(API_URL)가 설정되지 않았습니다. 선생님께 알려주세요.');
+          else showLobbyError('서버에 연결하지 못했습니다. 와이파이를 확인하고 다시 눌러주세요.');
+        }).then(function() {
+          isJoining = false;
+          btnStartGame.disabled = false;
+          if (labelEl) labelEl.textContent = labelOrig;
+        });
+      });
+    }
+
+    if (btnSubmitCode) {
+      btnSubmitCode.addEventListener('click', checkPasscode);
+    }
+
+    if (passcodeInput) {
+      passcodeInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') checkPasscode();
+      });
+    }
+
+    function showTeacherView() {
+      if (viewLobby) viewLobby.classList.add('hidden');
+      if (viewGameplay) viewGameplay.classList.add('hidden');
+      if (viewGameClear) viewGameClear.classList.add('hidden');
+      if (viewTeacherDashboard) viewTeacherDashboard.classList.remove('hidden');
+      if (teacherModeBtnText) teacherModeBtnText.textContent = "학생 모드 복귀";
+      isTeacherMode = true;
+      teamsProgress = {};
+      renderTeacherDashboard();
+      startTeacherPolling();
+    }
+
+    function leaveTeacherView() {
+      isTeacherMode = false;
+      stopTeacherPolling();
+      if (viewTeacherDashboard) viewTeacherDashboard.classList.add('hidden');
+      if (teacherModeBtnText) teacherModeBtnText.textContent = "교사 관제탑";
+      if (myProgress && myProgress.active) {
+        if (currentStage > 20 || myProgress.stage > 20) {
+          if (viewGameClear) viewGameClear.classList.remove('hidden');
+        } else {
+          if (viewGameplay) viewGameplay.classList.remove('hidden');
+        }
+      } else {
+        if (viewLobby) viewLobby.classList.remove('hidden');
+      }
+    }
+
+    // 교사 관제탑 전환 토글 (교사 비밀번호 확인)
+    if (btnToggleTeacherMode) {
+      btnToggleTeacherMode.addEventListener('click', function() {
+        if (isTeacherMode) { leaveTeacherView(); return; }
+        if (teacherPin) { showTeacherView(); return; }
+        var pin = window.prompt('교사 비밀번호를 입력하세요');
+        if (pin === null || pin === '') return;
+        api({ action: 'auth', pin: pin.trim() }, 10000).then(function(res) {
+          if (res && res.ok) {
+            teacherPin = pin.trim();
+            showTeacherView();
+          } else {
+            alert('교사 비밀번호가 올바르지 않습니다.');
+          }
+        }).catch(function(e) {
+          if (e && e.message === 'NO_API_URL') alert('index.html 상단의 API_URL에 구글 앱스스크립트 웹 앱 주소를 먼저 넣어주세요.');
+          else alert('서버에 연결하지 못했습니다. 인터넷 연결을 확인하세요.');
+        });
+      });
+    }
+
+    // 교사 라운드 선택 옵션 생성 + 적용
+    (function() {
+      var sel = document.getElementById('teacher-round-select');
+      if (!sel) return;
+      for (var r = 1; r <= 5; r++) {
+        var o = document.createElement('option');
+        o.value = String(r);
+        o.textContent = 'ROUND ' + r + ' · ' + ROUNDS[r].title + ' (' + ROUNDS[r].level + ')';
+        sel.appendChild(o);
+      }
+    })();
+
+    var btnApplyRound = document.getElementById('btn-apply-round');
+    if (btnApplyRound) {
+      btnApplyRound.addEventListener('click', function() {
+        var sel = document.getElementById('teacher-round-select');
+        var r = sel ? Number(sel.value) : 1;
+        var btn = btnApplyRound;
+        api({ action: 'setRound', pin: teacherPin, round: r }, 10000).then(function(res) {
+          if (res && res.ok) {
+            btn.textContent = '적용됨!';
+            btn.classList.add('bg-emerald-500');
+            pollTeacherState();
+          } else {
+            btn.textContent = '실패';
+          }
+        }).catch(function() {
+          btn.textContent = '실패';
+        }).then(function() {
+          setTimeout(function() {
+            btn.textContent = '라운드 적용';
+            btn.classList.remove('bg-emerald-500');
+          }, 1200);
+        });
+      });
+    }
+
+    // 교사 시작 암호 저장 (서버에 저장 → 학생 입장 시 서버가 직접 검사)
+    if (btnSaveTeacherPasscode) {
+      btnSaveTeacherPasscode.addEventListener('click', function() {
+        if (!teacherCustomPasscode || teacherCustomPasscode.value.trim().length !== 4) {
+          alert('시작 암호는 4자리로 입력하세요.');
+          return;
+        }
+        var btn = btnSaveTeacherPasscode;
+        api({ action: 'setCode', pin: teacherPin, code: teacherCustomPasscode.value.trim() }, 10000).then(function(res) {
+          if (res && res.ok) {
+            currentMasterStartCode = res.code;
+            btn.textContent = "적용됨!";
+            btn.classList.add('bg-emerald-500');
+          } else {
+            btn.textContent = "실패";
+          }
+        }).catch(function() {
+          btn.textContent = "실패";
+        }).then(function() {
+          setTimeout(function() {
+            btn.textContent = "적용";
+            btn.classList.remove('bg-emerald-500');
+          }, 1200);
+        });
+      });
+    }
+
+    // 관제탑 전체 초기화 (모든 조 기록 삭제, 학생 기기는 자동 새로고침)
+    if (btnResetSession) {
+      btnResetSession.addEventListener('click', function() {
+        if (!confirm("현재 접속된 모든 조의 기록을 초기화하시겠습니까?")) return;
+        api({ action: 'reset', pin: teacherPin }, 10000).then(function(res) {
+          if (res && res.ok) {
+            teamsProgress = {};
+            renderTeacherDashboard();
+          } else {
+            alert('초기화에 실패했습니다.');
+          }
+        }).catch(function() {
+          alert('서버에 연결하지 못했습니다.');
+        });
+      });
+    }
+
+    if (soundToggleBtn) {
+      soundToggleBtn.addEventListener('click', function() {
+        isSoundMuted = !isSoundMuted;
+        if (soundIcon) {
+          soundIcon.className = isSoundMuted ? "ph-bold ph-speaker-slash text-base text-amber-400" : "ph-bold ph-speaker-high text-base text-emerald-400";
+        }
+      });
+    }
+
+    if (btnRestartGame) {
+      btnRestartGame.addEventListener('click', function() {
+        location.reload();
+      });
+    }
+
+    // 초기 실행
+    renderKeySlots();
+    api({ action: 'ping' }, 8000).then(function(res) {
+      if (res && res.ok && res.round && ROUNDS[res.round]) {
+        var lb = document.getElementById('lobby-round-badge');
+        if (lb) {
+          lb.textContent = 'ROUND ' + res.round + ' · ' + ROUNDS[res.round].title + ' (' + ROUNDS[res.round].level + ')';
+          lb.classList.remove('hidden');
+        }
+      }
+      setStudentSyncStatus(res && res.ok
+        ? '<span class="text-emerald-400"><i class="ph-bold ph-check-circle"></i> 관제 서버 연결 확인됨</span>'
+        : '<span class="text-amber-400"><i class="ph-bold ph-warning"></i> 관제 서버 응답 이상</span>');
+    }).catch(function(e) {
+      setStudentSyncStatus(e && e.message === 'NO_API_URL'
+        ? '<span class="text-amber-400"><i class="ph-bold ph-warning"></i> 서버 주소(API_URL) 미설정</span>'
+        : '<span class="text-amber-400"><i class="ph-bold ph-warning"></i> 관제 서버에 연결하지 못했습니다 (입장 시 재시도)</span>');
+    });
+  </script>
+</body>
+</html>
